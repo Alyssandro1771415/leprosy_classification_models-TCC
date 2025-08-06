@@ -209,6 +209,7 @@ __marimo__/
 # images
 *.jpeg
 *.jpg
+*.npy
 
 # Models
 *.pkl
