@@ -213,3 +213,28 @@ __marimo__/
 
 # Models
 *.pkl
+*.h5
+*.hdf5
+
+# Específico do projeto - Modelos de Classificação de Hanseníase
+# ==============================================================
+
+# Logs de treinamento
+logs/
+tensorboard_logs/
+
+# Checkpoints de modelos
+checkpoints/
+*.ckpt
+*.ckpt.*
+
+# Arquivos temporários do projeto
+temp/
+tmp/
+results/
+experiments/
+outputs/
+
+# Cache do matplotlib e seaborn
+.matplotlib/
+.seaborn-data/
