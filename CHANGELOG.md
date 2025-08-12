@@ -13,8 +13,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   - Modelo multiclasse (7 tipos de hanseníase)
 - **Pipeline de pré-processamento**
   - Conversão RGB → YCbCr (canal Y)
-  - Aplicação de DCT 2D
-  - Normalização robusta com clipping
+  - Normalização para [0, 1]
+  - Preservação de características espaciais
 - **Arquitetura ResNet50 adaptada**
   - Entrada de canal único (224x224x1)
   - Camada de expansão de canais
@@ -46,7 +46,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **Dataset binário**: 1.372 imagens (752 hanseníase, 620 outros)
 - **Dataset multiclasse**: 752 imagens (7 classes)
 - **Divisão estratificada**: 80% treino, 20% validação
-- **Formato processado**: Arquivos .npy com coeficientes DCT
+- **Formato processado**: Arquivos .npy com canal Y normalizado
 
 ### 🎯 Funcionalidades
 - **Treinamento automatizado** com callbacks

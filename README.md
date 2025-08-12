@@ -22,9 +22,8 @@ Este projeto desenvolve modelos de deep learning para classificação automátic
 
 ### 🔬 Metodologia
 
-O projeto utiliza uma abordagem inovadora combinando:
-- **Conversão YCbCr**: Extração do canal Y (luminância) para reduzir dimensionalidade
-- **Transformada DCT**: Aplicação de DCT 2D para extração de características
+O projeto utiliza uma abordagem otimizada para diagnóstico médico:
+- **Conversão YCbCr**: Extração do canal Y (luminância) preservando informações importantes
 - **ResNet50**: Arquitetura adaptada para entrada de canal único
 - **Transfer Learning**: Treinamento do zero com arquitetura ResNet50
 
@@ -36,11 +35,11 @@ leprosy_classification_models-TCC/
 │   ├── raw/                          # Imagens originais
 │   │   ├── train_images_binary/      # Dataset binário (leprosy, outros)
 │   │   └── train_images_classification/ # Dataset multiclasse (7 tipos)
-│   └── processed/                    # Imagens processadas (YCbCr + DCT)
+│   └── processed/                    # Imagens processadas (canal Y)
 │       ├── train_images_binary/      # Arquivos .npy binários
 │       └── train_images_classification/ # Arquivos .npy multiclasse
 ├── 📁 pipelines/                     # Pipeline de pré-processamento
-│   └── pre_processing_images.py      # Conversão YCbCr + DCT
+│   └── pre_processing_images.py      # Conversão YCbCr (canal Y)
 ├── 📁 train/                         # Scripts de treinamento
 │   ├── binary_model_from_zero.py     # Modelo binário do zero
 │   ├── classsification_model_from_zero.py # Modelo multiclasse do zero
@@ -104,19 +103,19 @@ pip install -r requirements.txt
 
 ### 1. Pré-processamento
 
-O pipeline de pré-processamento converte imagens RGB para o espaço YCbCr e aplica DCT:
+O pipeline de pré-processamento converte imagens RGB para o canal Y (luminância):
 
 ```python
-from pipelines.pre_processing_images import process_image
+from pipelines.pre_processing_images import process_single_image
 
 # Processa uma imagem
-dct_coefficients = process_image('path/to/image.jpg', 'output/coefficients.npy')
+y_channel = process_single_image('path/to/image.jpg', 'output/y_channel.npy')
 ```
 
 **Etapas do pré-processamento:**
 1. **Conversão RGB → YCbCr**: Extrai canal Y (luminância)
-2. **DCT 2D**: Aplica Transformada Discreta do Cosseno
-3. **Salvamento**: Armazena coeficientes como arquivos .npy
+2. **Normalização**: Normaliza valores para [0, 1]
+3. **Salvamento**: Armazena canal Y como arquivos .npy
 
 ### 2. Estrutura dos Dados
 
@@ -304,9 +303,9 @@ jupyter notebook
 
 ### Inovações do Projeto
 
-1. **Processamento YCbCr + DCT**:
-   - Reduz dimensionalidade mantendo informações relevantes
-   - Canal Y captura características de luminância importantes para diagnóstico
+1. **Processamento YCbCr Otimizado**:
+   - Extrai canal Y preservando características espaciais importantes
+   - Canal Y captura informações de luminância cruciais para diagnóstico médico
 
 2. **Arquitetura Adaptada**:
    - ResNet50 modificado para entrada de canal único

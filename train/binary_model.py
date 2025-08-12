@@ -1,3 +1,9 @@
+import os
+import sys
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
+
 # 1 - Importaçõe
 
 import matplotlib.pyplot as plt
@@ -6,15 +12,14 @@ import pandas as pd
 import random
 import seaborn as sns
 import tensorflow as tf
+from utils.models_to_pkl import save_model
 
-from utils.models_pkl import save_model
 
-
-"""2 - Importação do Modelo Pré-Treinado - ResNet50 com pesos do imagenet e sem as camadas densas"""
+# 2 - Importação do Modelo Pré-Treinado - ResNet50 com pesos do imagenet e sem as camadas densas
 
 pre_treined_model = tf.keras.applications.ResNet50(weights='imagenet', include_top=False)
 
-"""3 - Criando as Camadas Densas Personalizadas"""
+# 3 - Criando as Camadas Densas Personalizadas
 
 # Captura da camada densa de saída
 x = pre_treined_model.output
@@ -37,7 +42,7 @@ modelo_binario = tf.keras.Model(inputs = pre_treined_model.input, outputs = pred
 for i, layer in enumerate(modelo_binario.layers):
     print(i, layer)
 
-"""4 - Setando as camadas treinaveis e as que devem ser congeladas"""
+# 4 - Setando as camadas treinaveis e as que devem ser congeladas
 
 for layer in modelo_binario.layers[:175]:
     layer.trainable = False
@@ -45,7 +50,7 @@ for layer in modelo_binario.layers[:175]:
 for layer in modelo_binario.layers[175:]:
     layer.trainable = True
 
-"""5 - Preparação para treinamento e treinamento do modelo nas camadas densas"""
+# 5 - Preparação para treinamento e treinamento do modelo nas camadas densas
 
 # Ele vai pegar toda a base de imagens e já fará todo o pré-processamento
 # com base no que o resnet já foi treinado previamente com as de pré-treinamento
@@ -84,7 +89,7 @@ history = modelo_binario.fit(train_generator,
 
 save_model(modelo_binario, "modelo_binario")
 
-"""6 - Avaliação do Modelo"""
+# 6 - Avaliação do Modelo
 
 accuracy = history.history["accuracy"]
 loss = history.history["loss"]

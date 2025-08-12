@@ -58,6 +58,7 @@ for layer in modelo_binario.layers:
 def load_npy_dataset(data_dir, target_size=(224, 224)):
     """
     Carrega dataset de arquivos .npy organizados em subpastas por classe
+    Os arquivos .npy agora contêm canal Y normalizado [0, 1]
     """
     images = []
     labels = []
@@ -81,21 +82,17 @@ def load_npy_dataset(data_dir, target_size=(224, 224)):
 
         for i, npy_file in enumerate(npy_files):
             try:
-                # Carrega a imagem .npy
+                # Carrega a imagem .npy (já normalizada [0, 1])
                 img = np.load(npy_file)
 
-                # Redimensiona para o tamanho alvo
-                img_resized = tf.image.resize(img[..., np.newaxis], target_size)
+                # Redimensiona para o tamanho alvo se necessário
+                if img.shape != target_size:
+                    img_resized = tf.image.resize(img[..., np.newaxis], target_size)
+                    img_final = img_resized.numpy()
+                else:
+                    img_final = img[..., np.newaxis]
 
-                # Normalização mais robusta: primeiro clipa valores extremos, depois normaliza
-                img_clipped = tf.clip_by_value(img_resized,
-                                             tf.reduce_mean(img_resized) - 3*tf.math.reduce_std(img_resized),
-                                             tf.reduce_mean(img_resized) + 3*tf.math.reduce_std(img_resized))
-
-                # Normaliza para o intervalo [0, 1]
-                img_normalized = (img_clipped - tf.reduce_min(img_clipped)) / (tf.reduce_max(img_clipped) - tf.reduce_min(img_clipped) + 1e-8)
-
-                images.append(img_normalized.numpy())
+                images.append(img_final)
                 labels.append(class_to_idx[class_name])
 
                 # Mostra progresso a cada 100 imagens

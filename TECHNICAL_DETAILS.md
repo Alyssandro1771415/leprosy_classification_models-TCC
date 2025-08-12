@@ -79,24 +79,10 @@ def rgb_to_y_channel(image):
     return np.array(y, dtype=np.float32)
 ```
 
-### 2. Aplicação de DCT 2D
+### 2. Normalização
 ```python
-def apply_dct_2d(channel):
-    """Aplica DCT 2D (linha e coluna)"""
-    return dct(dct(channel.T, norm='ortho').T, norm='ortho')
-```
-
-### 3. Normalização
-```python
-# Clipping de valores extremos (3 desvios padrão)
-img_clipped = tf.clip_by_value(
-    img_resized, 
-    mean - 3*std,
-    mean + 3*std
-)
-
-# Normalização para [0, 1]
-img_normalized = (img_clipped - min_val) / (max_val - min_val + 1e-8)
+# Normalização simples para [0, 1]
+img_normalized = img_array / 255.0
 ```
 
 ## ⚙️ Configurações de Treinamento

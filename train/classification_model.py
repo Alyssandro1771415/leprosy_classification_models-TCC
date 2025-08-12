@@ -1,18 +1,26 @@
-# 1 - Importações
-import sys
 import os
-import tensorflow as tf
-import pandas as pd
+import sys
+
+# Adiciona o diretório raiz do projeto ao path para importar utils
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
+
+# 1 - Importações
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+import sys
+import os
+import pandas as pd
+import tensorflow as tf
 import random
+import seaborn as sns
+from utils.models_to_pkl import save_model
 
-"""2 - Importação do modelo pré-treinado"""
+# 2 - Importação do modelo pré-treinado
 
 pre_treined_model = tf.keras.applications.ResNet50(weights='imagenet', include_top=False)
 
-"""3 - Criação das camadas densas personalizadas"""
+# 3 - Criação das camadas densas personalizadas
 
 x = pre_treined_model.output
 
@@ -29,7 +37,7 @@ modelo_classificacao = tf.keras.Model(inputs = pre_treined_model.input, outputs 
 for i, layer in enumerate(modelo_classificacao.layers):
     print(i, layer)
 
-"""4 - Configurando as camadas que densas para treinar e congelando as demais"""
+# 4 - Configurando as camadas que densas para treinar e congelando as demais
 
 for layer in modelo_classificacao.layers[:175]:
     layer.trainable = False
@@ -37,7 +45,7 @@ for layer in modelo_classificacao.layers[:175]:
 for layer in modelo_classificacao.layers[175:]:
     layer.trainable = True
 
-"""5 - Preparação e Treinamento do Modelo"""
+# 5 - Preparação e Treinamento do Modelo
 
 train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=tf.keras.applications.resnet50.preprocess_input,
                                                                 validation_split = 0.2)
@@ -70,7 +78,6 @@ history = modelo_classificacao.fit(train_generator,
                      epochs=10)
 # A redução da taxa de aprendizagem não apresentou resultados bons para esse modelo
 
-from utils.models_pkl import save_model
 
 save_model(modelo_classificacao, "modelo_classificacao")
 
