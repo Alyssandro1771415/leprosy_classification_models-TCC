@@ -92,57 +92,97 @@ img_normalized = img_array / 255.0
 optimizer = Adam(learning_rate=1e-4)
 ```
 
-### Callbacks
+### Callbacks Avançados
+
+#### **Todos os Modelos Incluem:**
+
 ```python
-# Redução de learning rate
+# Redução automática de learning rate
 reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss',
-    factor=0.2,
-    patience=3,
-    min_lr=1e-6,
-    verbose=1
+    monitor='val_loss',        # Monitora loss de validação
+    factor=0.2,                # Reduz LR para 20% do valor atual
+    patience=3,                # Espera 3 épocas sem melhoria
+    min_lr=1e-6,               # Learning rate mínimo
+    verbose=1                  # Mostra quando reduz
 )
 
-# Parada antecipada
+# Parada antecipada para prevenir overfitting
 early_stopping = EarlyStopping(
-    monitor='val_loss',
-    patience=5,
-    restore_best_weights=True,
-    verbose=1
+    monitor='val_loss',        # Monitora loss de validação
+    patience=5,                # Espera 5 épocas sem melhoria
+    restore_best_weights=True, # Restaura melhor versão do modelo
+    verbose=1                  # Mostra quando para
 )
 ```
 
-### Configurações de Dados
+#### **Coordenação dos Callbacks:**
+- **ReduceLROnPlateau** (patience=3): Tenta otimizar primeiro
+- **EarlyStopping** (patience=5): Para se otimização não funcionar
+- **restore_best_weights**: Garante melhor versão final
+
+### Configurações de Dados e Treinamento
+
 ```python
-# Batch size
+# Configurações de dados
 batch_size = 32
-
-# Épocas máximas
-max_epochs = 40
-
-# Divisão estratificada
-test_size = 0.2
+test_size = 0.2  # 20% para validação
 random_state = 42
+
+# Configurações de épocas por tipo de modelo
+epochs_pretrained = 30    # Modelos pré-treinados
+epochs_from_zero = 40     # Modelos do zero
+
+# Geradores de dados
+train_generator = flow_from_directory(subset='training')
+validation_generator = flow_from_directory(subset='validation')
+```
+
+### Estratégia de Validação
+
+```python
+# Divisão estratificada mantém proporção das classes
+validation_split = 0.2
+
+# Geradores separados para treino e validação
+# Essencial para EarlyStopping funcionar corretamente
+history = model.fit(
+    train_generator,
+    validation_data=validation_generator,  # Obrigatório
+    epochs=max_epochs,
+    callbacks=[reduce_lr, early_stopping]
+)
 ```
 
 ## 📈 Métricas de Avaliação
 
 ### Métricas Principais
-- **Acurácia**: Proporção de predições corretas
-- **Loss**: Função de perda (crossentropy)
-- **Acurácia de Validação**: Acurácia no conjunto de validação
-- **Loss de Validação**: Loss no conjunto de validação
+- **Acurácia**: Proporção de predições corretas (treino e validação)
+- **Loss**: Função de perda (crossentropy) (treino e validação)
+- **Learning Rate**: Monitoramento e ajuste automático
+- **Épocas Treinadas**: Número real de épocas (pode ser menor que máximo)
 
-### Análise de Overfitting
+### Análise Automática de Overfitting
 ```python
-# Diferença entre treino e validação
-acc_diff = train_accuracy - val_accuracy
+# Análise automática implementada em todos os modelos
+overfitting = accuracy[-1] - val_accuracy[-1]
 
-if acc_diff > 0.1:
-    status = "Possível overfitting"
+if overfitting > 0.1:
+    print(f"⚠️ Possível overfitting detectado (diferença: {overfitting:.4f})")
 else:
-    status = "Modelo bem generalizado"
+    print(f"✅ Modelo bem generalizado (diferença: {overfitting:.4f})")
+
+# Resumo automático de métricas
+print(f"📊 Resumo do Treinamento:")
+print(f"Épocas treinadas: {len(accuracy)}")
+print(f"Acurácia final (treino): {accuracy[-1]:.4f}")
+print(f"Acurácia final (validação): {val_accuracy[-1]:.4f}")
 ```
+
+### Visualizações Aprimoradas
+- **Gráficos lado a lado**: Treino vs Validação
+- **Métricas em tempo real**: Durante o treinamento
+- **Análise automática**: Detecção de problemas
+- **Resumo detalhado**: Métricas finais organizadas
 
 ## 💾 Sistema de Salvamento
 

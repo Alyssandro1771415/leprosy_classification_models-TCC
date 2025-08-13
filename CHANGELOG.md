@@ -5,6 +5,46 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2025-08-12
+
+### ✨ Adicionado
+- **EarlyStopping em todos os modelos**
+  - Prevenção automática de overfitting
+  - Restauração dos melhores pesos
+  - Monitoramento de val_loss com patience=5
+- **Geradores de validação separados**
+  - Validação adequada para todos os modelos
+  - Subset='validation' configurado corretamente
+- **Visualizações aprimoradas**
+  - Gráficos lado a lado (treino vs validação)
+  - Análise automática de overfitting
+  - Resumo detalhado de métricas
+- **Pipeline otimizado sem DCT**
+  - Remoção completa do DCT
+  - Preservação de características espaciais
+  - Dados reprocessados com canal Y apenas
+
+### 🔧 Modificado
+- **Callbacks otimizados**
+  - ReduceLROnPlateau: patience aumentado para 3
+  - Coordenação melhorada entre callbacks
+- **Épocas aumentadas**
+  - Modelos pré-treinados: 10 → 30 épocas
+  - Modelos do zero: mantidos em 40 épocas
+- **Documentação atualizada**
+  - README.md com novas configurações
+  - TECHNICAL_DETAILS.md expandido
+  - Guias de uso atualizados
+
+### ❌ Removido
+- **DCT completamente removido**
+  - Pipeline de pré-processamento simplificado
+  - Arquivos .npy antigos com DCT
+  - Menções ao DCT na documentação
+- **Scripts de comparação DCT**
+  - Arquivos desnecessários removidos
+  - Limpeza completa do projeto
+
 ## [1.0.0] - 2025-08-08
 
 ### ✨ Adicionado
@@ -38,9 +78,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **Ambiente virtual** configurado
 - **Dependências** especificadas
 - **Estrutura de projeto** organizada
-- **Callbacks de treinamento**
-  - ReduceLROnPlateau
-  - EarlyStopping
+- **Callbacks de treinamento avançados**
+  - ReduceLROnPlateau com patience otimizado
+  - EarlyStopping com restore_best_weights
+  - Coordenação automática entre callbacks
 
 ### 📊 Datasets
 - **Dataset binário**: 1.372 imagens (752 hanseníase, 620 outros)

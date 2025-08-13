@@ -190,20 +190,29 @@ base_model = tf.keras.applications.ResNet50(weights=None, include_top=False, inp
 ### Configurações de Treinamento
 
 **Otimizador**: Adam (lr=1e-4)
-**Callbacks**:
-- `ReduceLROnPlateau`: Reduz learning rate quando loss estagnar
-- `EarlyStopping`: Para treinamento se não houver melhoria
+**Callbacks Avançados**:
+- `ReduceLROnPlateau`: Reduz learning rate quando loss estagnar (patience=3)
+- `EarlyStopping`: Para treinamento automaticamente se não houver melhoria (patience=5)
+- `restore_best_weights=True`: Restaura melhor versão do modelo
 
 **Divisão dos Dados**:
 - 80% Treinamento
 - 20% Validação
 - Divisão estratificada (mantém proporção das classes)
+- Geradores separados para treino e validação
+
+**Configurações de Épocas**:
+- Modelos pré-treinados: 30 épocas máximo
+- Modelos do zero: 40 épocas máximo
+- EarlyStopping previne overfitting automaticamente
 
 ### Métricas Monitoradas
 
-- **Acurácia**: Precisão geral do modelo
+- **Acurácia**: Precisão geral do modelo (treino e validação)
 - **Loss**: Função de perda (binary_crossentropy/categorical_crossentropy)
-- **Validação**: Métricas calculadas no conjunto de validação
+- **Validação**: Métricas calculadas no conjunto de validação separado
+- **Overfitting**: Análise automática da diferença treino vs validação
+- **Learning Rate**: Monitoramento e redução automática
 
 ## 🔍 Análise de Modelos
 

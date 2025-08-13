@@ -88,6 +88,14 @@ python analyze_models.py
 
 - **modelo_binario_do_zero**: Classificação binária (hanseníase vs outros)
 - **modelo_classificacao_do_zero**: Classificação multiclasse (7 tipos de hanseníase)
+- **binary_model**: Modelo binário pré-treinado (com EarlyStopping)
+- **classification_model**: Modelo multiclasse pré-treinado (com EarlyStopping)
+
+### 🆕 Melhorias Recentes (v1.1.0)
+- **EarlyStopping**: Todos os modelos agora incluem parada antecipada
+- **Validação adequada**: Geradores separados para treino e validação
+- **Análise de overfitting**: Detecção automática em todos os modelos
+- **Visualizações aprimoradas**: Gráficos lado a lado com métricas completas
 
 ## 📁 Estrutura de arquivos esperada
 

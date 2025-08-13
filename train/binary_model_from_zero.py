@@ -269,3 +269,10 @@ plt.title("Evolução da Perda")
 
 plt.tight_layout()
 plt.show()
+
+# Análise de overfitting
+overfitting = accuracy[-1] - val_accuracy[-1]
+if overfitting > 0.1:
+    print(f"⚠️ Possível overfitting detectado (diferença: {overfitting:.4f})")
+else:
+    print(f"✅ Modelo bem generalizado (diferença: {overfitting:.4f})")
