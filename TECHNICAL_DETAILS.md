@@ -40,12 +40,12 @@ Divisão:
 - **Pré-processamento**: ResNet50.preprocess_input
 
 #### 2. Modelos do Zero (Dados .npy)
-- **binary_model_from_zero.py**: Usa dados com Otsu's Thresholding ⭐
-- **classsification_model_from_zero.py**: Usa canal Y apenas
+- **binary_model_from_zero.py**: Usa dados com Bilateral Filter + Otsu's Thresholding ⭐
+- **classsification_model_from_zero.py**: Usa dados com Bilateral Filter + Canal Y
 - **Entrada**: Arrays .npy normalizados [0, 1]
-- **Pré-processamento**: Já aplicado no pipeline
+- **Pré-processamento**: Bilateral Filter + processamento específico já aplicado
 
-> **💡 Recomendação**: Para modelos binários, use `binary_model_from_zero.py` que utiliza dados otimizados com Otsu's Thresholding.
+> **💡 Recomendação**: Para modelos binários, use `binary_model_from_zero.py` que utiliza dados otimizados com Bilateral Filter + Otsu's Thresholding.
 
 ### Modelo Base: ResNet50 Adaptado
 
@@ -95,19 +95,37 @@ def rgb_to_y_channel(image):
     return np.array(y, dtype=np.float32)
 ```
 
-### 2. Processamento Diferenciado por Tipo de Modelo
+### 2. Pipeline Avançado de Processamento
+
+#### Bilateral Filter (Aplicado em TODAS as imagens):
+```python
+def apply_bilateral_filter(image_array, d=9, sigma_color=75, sigma_space=75):
+    """
+    Aplica Bilateral Filter para redução de ruído preservando bordas
+
+    Args:
+        d: Diâmetro do pixel neighborhood (9 é padrão)
+        sigma_color: Filtro sigma no espaço de cor (75 é padrão)
+        sigma_space: Filtro sigma no espaço de coordenadas (75 é padrão)
+    """
+    filtered = cv2.bilateralFilter(image_array, d, sigma_color, sigma_space)
+    return filtered
+```
 
 #### Para Modelos de Classificação:
 ```python
-# Apenas normalização simples para [0, 1]
-y_channel = rgb_to_y_channel(image, apply_otsu=False)
-img_normalized = y_array / 255.0
+# Bilateral Filter + Canal Y normalizado
+y_channel = rgb_to_y_channel(image, apply_otsu=False, apply_bilateral=True)
+
+# Pipeline: RGB → YCbCr → Canal Y → Bilateral Filter → Normalização [0,1]
 ```
 
-#### Para Modelos Binários (Otsu's Thresholding):
+#### Para Modelos Binários:
 ```python
-# Aplicação de Otsu's Thresholding + normalização
-y_channel = rgb_to_y_channel(image, apply_otsu=True)
+# Bilateral Filter + Canal Y + Otsu's Thresholding
+y_channel = rgb_to_y_channel(image, apply_otsu=True, apply_bilateral=True)
+
+# Pipeline: RGB → YCbCr → Canal Y → Bilateral Filter → Otsu → Normalização [0,1]
 
 def apply_otsu_thresholding(y_channel):
     # Converte para uint8 se necessário

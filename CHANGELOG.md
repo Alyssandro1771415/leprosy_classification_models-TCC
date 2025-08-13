@@ -5,6 +5,28 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2025-08-12
+
+### ✨ Adicionado
+- **Bilateral Filter para redução de ruído**
+  - Aplicado em TODAS as imagens (binário e classificação)
+  - Preserva bordas importantes enquanto remove ruído
+  - Parâmetros otimizados: d=9, sigma_color=75, sigma_space=75
+- **Pipeline de processamento avançado**
+  - Bilateral Filter + Canal Y para classificação
+  - Bilateral Filter + Canal Y + Otsu para modelos binários
+  - Processamento inteligente por tipo de modelo
+
+### 🔧 Modificado
+- **Pipeline de pré-processamento aprimorado**
+  - Todas as imagens passam por Bilateral Filter
+  - Melhor qualidade de dados para treinamento
+  - Redução de ruído preservando características importantes
+- **Documentação expandida**
+  - Guias atualizados com Bilateral Filter
+  - Exemplos de código para novo pipeline
+  - Benefícios técnicos documentados
+
 ## [1.2.0] - 2025-08-12
 
 ### ✨ Adicionado

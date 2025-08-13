@@ -23,7 +23,9 @@ Este projeto desenvolve modelos de deep learning para classificação automátic
 ### 🔬 Metodologia
 
 O projeto utiliza uma abordagem otimizada para diagnóstico médico:
+- **Bilateral Filter**: Redução de ruído preservando bordas importantes
 - **Conversão YCbCr**: Extração do canal Y (luminância) preservando informações importantes
+- **Otsu's Thresholding**: Binarização automática para modelos binários
 - **ResNet50**: Arquitetura adaptada para entrada de canal único
 - **Transfer Learning**: Treinamento do zero com arquitetura ResNet50
 
@@ -103,30 +105,34 @@ pip install -r requirements.txt
 
 ### 1. Pré-processamento
 
-O pipeline de pré-processamento converte imagens RGB para o canal Y com processamento diferenciado:
+O pipeline de pré-processamento aplica técnicas avançadas de processamento de imagem:
 
 ```python
 from pipelines.pre_processing_images import process_single_image
 
-# Para modelos de classificação (canal Y apenas)
-y_channel = process_single_image('path/to/image.jpg', 'output/y_channel.npy', apply_otsu=False)
+# Para modelos de classificação (Bilateral Filter + Canal Y)
+y_channel = process_single_image('path/to/image.jpg', 'output/y_channel.npy',
+                                apply_otsu=False, apply_bilateral=True)
 
-# Para modelos binários (canal Y + Otsu's Thresholding)
-y_otsu = process_single_image('path/to/image.jpg', 'output/y_otsu.npy', apply_otsu=True)
+# Para modelos binários (Bilateral Filter + Canal Y + Otsu's Thresholding)
+y_otsu = process_single_image('path/to/image.jpg', 'output/y_otsu.npy',
+                             apply_otsu=True, apply_bilateral=True)
 ```
 
 **Etapas do pré-processamento:**
 
 ### Para Modelos de Classificação:
 1. **Conversão RGB → YCbCr**: Extrai canal Y (luminância)
-2. **Normalização**: Normaliza valores para [0, 1]
-3. **Salvamento**: Armazena canal Y como arquivos .npy
+2. **Bilateral Filter**: Reduz ruído preservando bordas importantes
+3. **Normalização**: Normaliza valores para [0, 1]
+4. **Salvamento**: Armazena canal Y filtrado como arquivos .npy
 
 ### Para Modelos Binários:
 1. **Conversão RGB → YCbCr**: Extrai canal Y (luminância)
-2. **Otsu's Thresholding**: Binariza automaticamente (0 ou 1)
-3. **Normalização**: Valores já normalizados [0, 1]
-4. **Salvamento**: Armazena dados binarizados como arquivos .npy
+2. **Bilateral Filter**: Reduz ruído preservando bordas importantes
+3. **Otsu's Thresholding**: Binariza automaticamente (0 ou 1)
+4. **Normalização**: Valores já normalizados [0, 1]
+5. **Salvamento**: Armazena dados binarizados como arquivos .npy
 
 ### 🚀 Treinamento dos Modelos
 
