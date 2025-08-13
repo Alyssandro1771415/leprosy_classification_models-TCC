@@ -41,9 +41,9 @@ leprosy_classification_models-TCC/
 ├── 📁 pipelines/                     # Pipeline de pré-processamento
 │   └── pre_processing_images.py      # Conversão YCbCr (canal Y)
 ├── 📁 train/                         # Scripts de treinamento
-│   ├── binary_model_from_zero.py     # Modelo binário do zero
+│   ├── binary_model_from_zero.py     # Modelo binário (do zero, dados com Otsu)
 │   ├── classsification_model_from_zero.py # Modelo multiclasse do zero
-│   ├── binary_model.py               # Modelo binário pré-treinado
+│   ├── binary_model.py               # Modelo binário (pré-treinado, imagens JPG)
 │   └── classification_model.py       # Modelo multiclasse pré-treinado
 ├── 📁 utils/                         # Utilitários
 │   ├── models_to_pkl.py              # Salvamento/carregamento de modelos
@@ -103,19 +103,52 @@ pip install -r requirements.txt
 
 ### 1. Pré-processamento
 
-O pipeline de pré-processamento converte imagens RGB para o canal Y (luminância):
+O pipeline de pré-processamento converte imagens RGB para o canal Y com processamento diferenciado:
 
 ```python
 from pipelines.pre_processing_images import process_single_image
 
-# Processa uma imagem
-y_channel = process_single_image('path/to/image.jpg', 'output/y_channel.npy')
+# Para modelos de classificação (canal Y apenas)
+y_channel = process_single_image('path/to/image.jpg', 'output/y_channel.npy', apply_otsu=False)
+
+# Para modelos binários (canal Y + Otsu's Thresholding)
+y_otsu = process_single_image('path/to/image.jpg', 'output/y_otsu.npy', apply_otsu=True)
 ```
 
 **Etapas do pré-processamento:**
+
+### Para Modelos de Classificação:
 1. **Conversão RGB → YCbCr**: Extrai canal Y (luminância)
 2. **Normalização**: Normaliza valores para [0, 1]
 3. **Salvamento**: Armazena canal Y como arquivos .npy
+
+### Para Modelos Binários:
+1. **Conversão RGB → YCbCr**: Extrai canal Y (luminância)
+2. **Otsu's Thresholding**: Binariza automaticamente (0 ou 1)
+3. **Normalização**: Valores já normalizados [0, 1]
+4. **Salvamento**: Armazena dados binarizados como arquivos .npy
+
+### 🚀 Treinamento dos Modelos
+
+#### Modelo Binário (Hanseníase vs Outros)
+```bash
+# Modelo pré-treinado (usa imagens JPG originais)
+python train/binary_model.py
+
+# Modelo do zero (usa dados processados com Otsu's Thresholding) - RECOMENDADO
+python train/binary_model_from_zero.py
+```
+
+> **💡 Recomendação**: Use `binary_model_from_zero.py` para melhor precisão, pois utiliza dados otimizados com Otsu's Thresholding.
+
+#### Modelo de Classificação (7 tipos de hanseníase)
+```bash
+# Modelo pré-treinado
+python train/classification_model.py
+
+# Modelo do zero
+python train/classsification_model_from_zero.py
+```
 
 ### 2. Estrutura dos Dados
 

@@ -31,6 +31,22 @@ Divisão:
 
 ## 🧠 Arquitetura dos Modelos
 
+### Tipos de Modelos Disponíveis
+
+#### 1. Modelos Pré-treinados (ImageDataGenerator)
+- **binary_model.py**: Usa imagens JPG originais
+- **classification_model.py**: Usa imagens JPG originais
+- **Entrada**: Imagens RGB 224x224 pixels
+- **Pré-processamento**: ResNet50.preprocess_input
+
+#### 2. Modelos do Zero (Dados .npy)
+- **binary_model_from_zero.py**: Usa dados com Otsu's Thresholding ⭐
+- **classsification_model_from_zero.py**: Usa canal Y apenas
+- **Entrada**: Arrays .npy normalizados [0, 1]
+- **Pré-processamento**: Já aplicado no pipeline
+
+> **💡 Recomendação**: Para modelos binários, use `binary_model_from_zero.py` que utiliza dados otimizados com Otsu's Thresholding.
+
 ### Modelo Base: ResNet50 Adaptado
 
 ```python
@@ -79,10 +95,28 @@ def rgb_to_y_channel(image):
     return np.array(y, dtype=np.float32)
 ```
 
-### 2. Normalização
+### 2. Processamento Diferenciado por Tipo de Modelo
+
+#### Para Modelos de Classificação:
 ```python
-# Normalização simples para [0, 1]
-img_normalized = img_array / 255.0
+# Apenas normalização simples para [0, 1]
+y_channel = rgb_to_y_channel(image, apply_otsu=False)
+img_normalized = y_array / 255.0
+```
+
+#### Para Modelos Binários (Otsu's Thresholding):
+```python
+# Aplicação de Otsu's Thresholding + normalização
+y_channel = rgb_to_y_channel(image, apply_otsu=True)
+
+def apply_otsu_thresholding(y_channel):
+    # Converte para uint8 se necessário
+    y_uint8 = (y_channel * 255).astype(np.uint8) if y_channel.dtype != np.uint8 else y_channel
+
+    # Aplica Otsu's Thresholding
+    _, otsu_result = cv2.threshold(y_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return otsu_result / 255.0  # Normaliza para [0, 1]
 ```
 
 ## ⚙️ Configurações de Treinamento

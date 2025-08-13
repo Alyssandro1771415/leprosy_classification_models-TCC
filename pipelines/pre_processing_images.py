@@ -17,38 +17,69 @@ from PIL import Image
 import numpy as np
 import os
 from pathlib import Path
+import cv2
 
-def rgb_to_y_channel(image):
+def rgb_to_y_channel(image, apply_otsu=False):
     """
     Converte imagem RGB para canal Y (luminância) no espaço YCbCr
 
     Args:
         image (PIL.Image): Imagem RGB
+        apply_otsu (bool): Se True, aplica Otsu's Thresholding
 
     Returns:
         np.ndarray: Canal Y como array float32 normalizado [0, 1]
     """
     ycbcr = image.convert("YCbCr")
     y, _, _ = ycbcr.split()
-    y_array = np.array(y, dtype=np.float32)
+    y_array = np.array(y, dtype=np.uint8)
+
+    if apply_otsu:
+        # Aplica Otsu's Thresholding para destacar características
+        _, y_otsu = cv2.threshold(y_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        y_array = y_otsu.astype(np.float32)
+    else:
+        y_array = y_array.astype(np.float32)
 
     # Normaliza para [0, 1]
     return y_array / 255.0
 
-def process_single_image(image_path, output_path=None):
+def apply_otsu_thresholding(y_channel):
+    """
+    Aplica Otsu's Thresholding no canal Y
+
+    Args:
+        y_channel (np.ndarray): Canal Y como array uint8
+
+    Returns:
+        np.ndarray: Canal Y com Otsu's Thresholding aplicado
+    """
+    # Converte para uint8 se necessário
+    if y_channel.dtype != np.uint8:
+        y_uint8 = (y_channel * 255).astype(np.uint8)
+    else:
+        y_uint8 = y_channel
+
+    # Aplica Otsu's Thresholding
+    _, otsu_result = cv2.threshold(y_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    return otsu_result
+
+def process_single_image(image_path, output_path=None, apply_otsu=False):
     """
     Processa uma única imagem extraindo o canal Y
 
     Args:
         image_path (str): Caminho da imagem de entrada
         output_path (str, optional): Caminho para salvar o array .npy
+        apply_otsu (bool): Se True, aplica Otsu's Thresholding
 
     Returns:
-        np.ndarray: Canal Y normalizado
+        np.ndarray: Canal Y normalizado (com ou sem Otsu)
     """
     try:
         image = Image.open(image_path).convert("RGB")
-        y_channel = rgb_to_y_channel(image)
+        y_channel = rgb_to_y_channel(image, apply_otsu=apply_otsu)
 
         if output_path:
             # Cria diretório se não existir
@@ -61,7 +92,7 @@ def process_single_image(image_path, output_path=None):
         print(f"❌ Erro ao processar {image_path}: {e}")
         return None
 
-def process_directory(input_dir, output_dir, image_extensions=None):
+def process_directory(input_dir, output_dir, image_extensions=None, apply_otsu=False):
     """
     Processa todas as imagens de um diretório
 
@@ -69,6 +100,7 @@ def process_directory(input_dir, output_dir, image_extensions=None):
         input_dir (str): Diretório com imagens originais
         output_dir (str): Diretório para salvar arrays processados
         image_extensions (list): Extensões de arquivo a processar
+        apply_otsu (bool): Se True, aplica Otsu's Thresholding
 
     Returns:
         dict: Estatísticas do processamento
@@ -107,8 +139,8 @@ def process_directory(input_dir, output_dir, image_extensions=None):
             stats['skipped'] += 1
             continue
 
-        # Processa imagem
-        result = process_single_image(str(img_file), str(output_file))
+        # Processa imagem (com ou sem Otsu)
+        result = process_single_image(str(img_file), str(output_file), apply_otsu=apply_otsu)
 
         if result is not None:
             stats['processed'] += 1
@@ -124,20 +156,23 @@ def process_directory(input_dir, output_dir, image_extensions=None):
 def batch_process_datasets():
     """
     Processa todos os datasets do projeto (binário e classificação)
+    Aplica Otsu's Thresholding apenas no dataset binário
     """
     print("🔄 PROCESSAMENTO EM LOTE")
     print("=" * 50)
 
     datasets = [
         {
-            'name': 'Dataset Binário',
+            'name': 'Dataset Binário (com Otsu\'s Thresholding)',
             'input': 'data/raw/train_images_binary',
-            'output': 'data/processed/train_images_binary'
+            'output': 'data/processed/train_images_binary',
+            'apply_otsu': True  # Aplica Otsu apenas no binário
         },
         {
-            'name': 'Dataset Classificação',
+            'name': 'Dataset Classificação (canal Y apenas)',
             'input': 'data/raw/train_images_classification',
-            'output': 'data/processed/train_images_classification'
+            'output': 'data/processed/train_images_classification',
+            'apply_otsu': False  # Não aplica Otsu na classificação
         }
     ]
 
@@ -147,12 +182,13 @@ def batch_process_datasets():
         print(f"\n📊 Processando: {dataset['name']}")
         print(f"   Entrada: {dataset['input']}")
         print(f"   Saída: {dataset['output']}")
+        print(f"   Otsu's Thresholding: {'✅ Ativado' if dataset['apply_otsu'] else '❌ Desativado'}")
 
         if not os.path.exists(dataset['input']):
             print(f"   ⚠️ Diretório não encontrado: {dataset['input']}")
             continue
 
-        stats = process_directory(dataset['input'], dataset['output'])
+        stats = process_directory(dataset['input'], dataset['output'], apply_otsu=dataset['apply_otsu'])
 
         # Atualiza estatísticas totais
         for key in total_stats:
@@ -170,7 +206,9 @@ def batch_process_datasets():
 
     if total_stats['processed'] > 0:
         print(f"\n✅ Processamento concluído com sucesso!")
-        print(f"   Formato: Canal Y normalizado [0, 1]")
+        print(f"   📊 Dataset Binário: Canal Y + Otsu's Thresholding")
+        print(f"   📊 Dataset Classificação: Canal Y apenas")
+        print(f"   📏 Formato: Arrays normalizados [0, 1]")
     else:
         print(f"\n❌ Nenhuma imagem foi processada!")
 

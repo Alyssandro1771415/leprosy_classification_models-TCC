@@ -55,6 +55,8 @@ for layer in modelo_binario.layers[175:]:
 # Ele vai pegar toda a base de imagens e já fará todo o pré-processamento
 # com base no que o resnet já foi treinado previamente com as de pré-treinamento
 
+# NOTA: Este modelo usa imagens JPG originais, não os dados processados com Otsu
+# Para usar dados com Otsu's Thresholding, use binary_model_from_zero.py
 train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=tf.keras.applications.resnet50.preprocess_input,
                                                                 validation_split=0.2)
 

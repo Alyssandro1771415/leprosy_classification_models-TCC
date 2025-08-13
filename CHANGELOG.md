@@ -5,6 +5,30 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2025-08-12
+
+### ✨ Adicionado
+- **Otsu's Thresholding para modelos binários**
+  - Binarização automática aplicada apenas no dataset binário
+  - Melhoria esperada na precisão de classificação binária
+  - Processamento diferenciado por tipo de modelo
+- **Pipeline inteligente de pré-processamento**
+  - Detecção automática do tipo de dataset
+  - Aplicação seletiva de Otsu's Thresholding
+  - Configuração automática por tipo de modelo
+- **Dependência OpenCV adicionada**
+  - opencv-python>=4.5.0 para processamento avançado
+  - Suporte completo a Otsu's Thresholding
+
+### 🔧 Modificado
+- **Pipeline de pré-processamento otimizado**
+  - Dataset binário: Canal Y + Otsu's Thresholding
+  - Dataset classificação: Canal Y apenas (preserva detalhes)
+- **Documentação expandida**
+  - Guias específicos para cada tipo de modelo
+  - Recomendações de uso atualizadas
+  - Exemplos de código para Otsu's Thresholding
+
 ## [1.1.0] - 2025-08-12
 
 ### ✨ Adicionado
