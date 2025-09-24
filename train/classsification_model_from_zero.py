@@ -145,9 +145,9 @@ print("Carregando dataset...")
 
 # Tenta diferentes caminhos possíveis
 possible_paths = [
-    'data/processed/train_images_classification',  # Caminho relativo da raiz do projeto
-    '../data/processed/train_images_classification',  # Caminho relativo da pasta train
-    '../../data/processed/train_images_classification'  # Caminho original
+    'data/Atlas_Dermatology/processed/train_images_classification',  # Caminho relativo da raiz do projeto
+    '../data/Atlas_Dermatology/processed/train_images_classification',  # Caminho relativo da pasta train
+    '../../data/Atlas_Dermatology/processed/train_images_classification'  # Caminho original
 ]
 
 X, y, class_names = None, None, None

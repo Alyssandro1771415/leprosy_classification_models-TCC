@@ -1,6 +1,9 @@
 # Modelos de Classificação de Hanseníase - TCC
 # Dependências principais do projeto
 
+# Automação Web-Scripting
+selenium>=4.35.0
+
 # Deep Learning
 tensorflow>=2.8.0
 keras>=2.8.0

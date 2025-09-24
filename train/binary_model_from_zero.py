@@ -54,7 +54,6 @@ for layer in modelo_binario.layers:
     layer.trainable = True
 
 # 4 - Preparação do Dataset Customizado para arquivos .npy
-
 def load_npy_dataset(data_dir, target_size=(224, 224)):
     """
     Carrega dataset de arquivos .npy organizados em subpastas por classe
@@ -147,9 +146,9 @@ print("Carregando dataset...")
 
 # Tenta diferentes caminhos possíveis
 possible_paths = [
-    'data/processed/train_images_binary',  # Caminho relativo da raiz do projeto
-    '../data/processed/train_images_binary',  # Caminho relativo da pasta train
-    '../../data/processed/train_images_binary'  # Caminho original
+    'data/Atlas_Dermatology/processed/train_images_binary',  # Caminho relativo da raiz do projeto
+    '../data/Atlas_Dermatology/processed/train_images_binary',  # Caminho relativo da pasta train
+    '../../data/Atlas_Dermatology/processed/train_images_binary'  # Caminho original
 ]
 
 X, y = None, None

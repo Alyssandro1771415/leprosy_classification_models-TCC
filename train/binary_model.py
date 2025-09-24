@@ -58,9 +58,9 @@ for layer in modelo_binario.layers[175:]:
 # NOTA: Este modelo usa imagens JPG originais, não os dados processados com Otsu
 # Para usar dados com Otsu's Thresholding, use binary_model_from_zero.py
 train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(preprocessing_function=tf.keras.applications.resnet50.preprocess_input,
-                                                                validation_split=0.2)
+                                                                validation_split=0.3)
 
-train_generator = train_datagen.flow_from_directory('train_images_binary',
+train_generator = train_datagen.flow_from_directory('data/Atlas_Dermatology/raw/train_images_binary',
                                                     target_size = (224,224),
                                                     color_mode = 'rgb',
                                                     batch_size = 32,
@@ -70,7 +70,7 @@ train_generator = train_datagen.flow_from_directory('train_images_binary',
                                                     )
 
 # Gerador de validação para o EarlyStopping funcionar
-validation_generator = train_datagen.flow_from_directory('train_images_binary',
+validation_generator = train_datagen.flow_from_directory('data/Atlas_Dermatology/raw/train_images_binary',
                                                         target_size = (224,224),
                                                         color_mode = 'rgb',
                                                         batch_size = 32,
