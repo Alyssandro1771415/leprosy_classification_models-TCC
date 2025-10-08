@@ -189,8 +189,8 @@ def batch_process_datasets():
     datasets = [
         {
             'name': 'Dataset Binário (Bilateral Filter + Otsu\'s Thresholding)',
-            'input': 'data/Atlas_Dermatology/raw/train_images_binary',
-            'output': 'data/Atlas_Dermatology/processed/train_images_binary',
+            'input': 'data/CO2Wounds-V2/raw/train_images_binary/val',
+            'output': 'data/CO2Wounds-V2/processed/train_images_binary/val',
             'apply_otsu': True,      # Aplica Otsu apenas no binário
             'apply_bilateral': True  # Aplica Bilateral Filter
         },
@@ -198,7 +198,7 @@ def batch_process_datasets():
             'name': 'Dataset Classificação (Bilateral Filter + Canal Y)',
             'input': 'data/Atlas_Dermatology/raw/train_images_classification',
             'output': 'data/Atlas_Dermatology/processed/train_images_classification',
-            'apply_otsu': False,     # Não aplica Otsu na classificação
+            'apply_otsu': True,     # Não aplica Otsu na classificação
             'apply_bilateral': True  # Aplica Bilateral Filter
         }
     ]

@@ -12,6 +12,10 @@ Original file is located at
 import sys
 import os
 
+os.environ["TF_CUDNN_USE_AUTOTUNE"] = "0"
+os.environ["TF_XLA_FLAGS"] = "--tf_xla_auto_jit=0"
+
+
 # Adiciona o diretório raiz do projeto ao path para importar utils
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
@@ -26,9 +30,16 @@ import glob
 
 from utils.models_to_pkl import save_model
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
+
 # 2 - Criação de um modelo personalizado para entrada de 1 canal (escala de cinza)
 # Como o ResNet50 espera 3 canais, vamos criar uma camada de entrada personalizada
 input_layer = tf.keras.layers.Input(shape=(224, 224, 1))
+
+tf.keras.mixed_precision.set_global_policy('float32')
 
 # Converte de 1 canal para 3 canais replicando o canal de luminância
 x = tf.keras.layers.Conv2D(3, (1, 1), padding='same', name='channel_expansion')(input_layer)
@@ -39,7 +50,22 @@ base_model = tf.keras.applications.ResNet50(weights=None, include_top=False, inp
 # 3 - Camadas densas personalizadas
 x = base_model.output
 x = tf.keras.layers.GlobalAveragePooling2D()(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
 x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(128, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(128, activation='relu')(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(256, activation='relu')(x)
+x = tf.keras.layers.Dense(128, activation='relu')(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(128, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(128, activation='relu')(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
 x = tf.keras.layers.Dense(128, activation='relu')(x)
 predis = tf.keras.layers.Dense(7, activation='softmax')(x)
@@ -51,7 +77,6 @@ for layer in modelo_classificacao.layers:
     layer.trainable = True
 
 # 4 - Preparação do Dataset Customizado para arquivos .npy
-
 def load_npy_classification_dataset(data_dir, target_size=(224, 224)):
     """
     Carrega dataset de arquivos .npy organizados em subpastas por classe para classificação multiclasse
@@ -182,10 +207,10 @@ y_val_categorical = tf.keras.utils.to_categorical(y_val, num_classes=len(class_n
 
 # Cria datasets do TensorFlow
 train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train_categorical))
-train_dataset = train_dataset.batch(32).shuffle(1000)
+train_dataset = train_dataset.batch(8).shuffle(1000)
 
 val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val_categorical))
-val_dataset = val_dataset.batch(32)
+val_dataset = val_dataset.batch(8)
 
 # 5 - Compilação do Modelo
 modelo_classificacao.compile(
@@ -215,6 +240,7 @@ history = modelo_classificacao.fit(
     train_dataset,
     validation_data=val_dataset,
     epochs=40,
+    batch_size=8,
     callbacks=[reduce_lr, early_stopping]
 )
 
