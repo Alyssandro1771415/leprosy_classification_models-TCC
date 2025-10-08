@@ -1,19 +1,20 @@
 import os
-import pickle
+import tensorflow as tf
 
 def save_model(model_to_save, model_name):
     """
-    Salva um modelo Keras usando pickle
+    Salva um modelo Keras no formato oficial (.keras)
     """
     os.makedirs('models', exist_ok=True)
-    with open(f'./models/{model_name}.pkl', 'wb') as file:
-        pickle.dump(model_to_save, file)
-    print(f"Modelo salvo em: ./models/{model_name}.pkl")
+    model_path = f'./models/{model_name}.keras'
+    model_to_save.save(model_path)
+    print(f"✅ Modelo salvo em: {model_path}")
 
-def load_model(model_name):
+def load_model(model_path):
     """
-    Carrega um modelo Keras salvo com pickle
+    Carrega um modelo Keras salvo no formato oficial (.keras)
     """
-    with open(f'./models/{model_name}.pkl', 'rb') as file:
-        model = pickle.load(file)
+    model_path = f'{model_path}.keras'
+    model = tf.keras.models.load_model(model_path)
+    print(f"✅ Modelo carregado de: {model_path}")
     return model

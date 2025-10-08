@@ -108,7 +108,7 @@ history = modelo_binario.fit(train_generator,
                      callbacks=[reduce_lr, early_stopping])
 
 
-save_model(modelo_binario, "modelo_binario")
+save_model(modelo_binario, "modelo_binario_atlas_dermatology")
 
 # 6 - Avaliação do Modelo
 

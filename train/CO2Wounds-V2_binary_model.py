@@ -133,7 +133,7 @@ history = modelo_binario.fit(train_generator,
                      callbacks=[reduce_lr, early_stopping])
 
 
-save_model(modelo_binario, "modelo_binario")
+save_model(modelo_binario, "modelo_binario_co2wounds")
 
 # 6 - Avaliação do Modelo
 
@@ -176,3 +176,7 @@ if overfitting > 0.1:
     print(f"⚠️ Possível overfitting detectado (diferença: {overfitting:.4f})")
 else:
     print(f"✅ Modelo bem generalizado (diferença: {overfitting:.4f})")
+    
+    
+    
+print(f"\033[94m{train_generator.class_indices}\033[m")

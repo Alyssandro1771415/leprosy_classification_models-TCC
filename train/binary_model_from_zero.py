@@ -216,12 +216,12 @@ history = modelo_binario.fit(
 )
 
 # 8 - Salvando o Modelo e Histórico
-save_model(modelo_binario, "modelo_binario_do_zero")
+save_model(modelo_binario, "modelo_binario_do_zero_atlas_dermatology")
 
 # Salva o histórico de treinamento separadamente
 import pickle
 os.makedirs('models', exist_ok=True)
-with open('./models/modelo_binario_do_zero_history.pkl', 'wb') as f:
+with open('./models/modelo_binario_do_zero_history_atlas_dermatology.pkl', 'wb') as f:
     pickle.dump(history.history, f)
 
 # Salva informações adicionais do dataset

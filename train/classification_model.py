@@ -97,7 +97,7 @@ history = modelo_classificacao.fit(train_generator,
                      epochs=30,  # Aumentado para dar mais chance de convergir
                      callbacks=[reduce_lr, early_stopping])
 
-save_model(modelo_classificacao, "modelo_classificacao")
+save_model(modelo_classificacao, "modelo_classificacao_atlas_dermatology")
 
 """6 - Avaliação do Modelo"""
 

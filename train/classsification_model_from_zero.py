@@ -245,7 +245,7 @@ history = modelo_classificacao.fit(
 )
 
 # 8 - Salvando o modelo e histórico
-save_model(modelo_classificacao, "modelo_classificacao_do_zero")
+save_model(modelo_classificacao, "modelo_classificacao_do_zero_atlas_dermatology")
 
 # Salva o histórico de treinamento separadamente
 import pickle
