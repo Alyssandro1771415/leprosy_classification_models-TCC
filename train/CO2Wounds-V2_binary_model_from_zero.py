@@ -15,6 +15,10 @@ sys.path.append(project_root)
 
 from utils.models_to_pkl import save_model
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
+
 # 1 - Criação do modelo
 input_layer = tf.keras.layers.Input(shape=(224, 224, 1))
 x = tf.keras.layers.Conv2D(3, (1, 1), padding='same', name='channel_expansion')(input_layer)
@@ -24,6 +28,12 @@ tf.keras.mixed_precision.set_global_policy('float32')
 
 x = base_model.output
 x = tf.keras.layers.GlobalAveragePooling2D()(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(256, activation='relu')(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(256, activation='relu')(x)
 x = tf.keras.layers.Dense(1024, activation='relu')(x)
 x = tf.keras.layers.Dense(512, activation='relu')(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
@@ -130,25 +140,20 @@ with open('./models/modelo_binario_do_zero_info.pkl', 'wb') as f:
 
 print("✅ Modelo e histórico salvos com sucesso.")
 
-# 9 - Avaliação visual
-plt.figure(figsize=(12, 4))
-plt.subplot(1, 2, 1)
-plt.plot(history.history['accuracy'], label='Treino')
-plt.plot(history.history['val_accuracy'], label='Validação')
-plt.title('Acurácia')
-plt.legend()
-
-plt.subplot(1, 2, 2)
-plt.plot(history.history['loss'], label='Treino')
-plt.plot(history.history['val_loss'], label='Validação')
-plt.title('Perda')
-plt.legend()
-
-plt.show()
-
-# 10 - Overfitting check
-acc, val_acc = history.history["accuracy"][-1], history.history["val_accuracy"][-1]
+# 9 - Overfitting check
+acc = history.history["accuracy"][-1]
+val_acc = history.history["val_accuracy"][-1]
+loss = history.history["loss"][-1]
+val_loss = history.history["val_loss"][-1]
 gap = acc - val_acc
+
+print(f"\n📊 Resumo do Treinamento:")
+print(f"Acurácia final (treino): {acc:.4f}")
+print(f"Acurácia final (validação): {val_acc:.4f}")
+print(f"Loss final (treino): {loss:.4f}")
+print(f"Loss final (validação): {val_loss:.4f}")
+
+
 if gap > 0.1:
     print(f"⚠️ Overfitting detectado (diferença: {gap:.4f})")
 else:

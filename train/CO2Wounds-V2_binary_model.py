@@ -18,10 +18,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.resnet50 import preprocess_input
 
 
-os.environ["TF_CUDNN_USE_AUTOTUNE"] = "0"
-os.environ["TF_XLA_FLAGS"] = "--tf_xla_auto_jit=0"
-
-
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
@@ -42,6 +38,12 @@ x = tf.keras.layers.GlobalAveragePooling2D()(x)
 
 # Atribuimos N neurônios à camada densa e somamos ao x que já tínhamos
 
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(256, activation='relu')(x)
+x = tf.keras.layers.Dense(1024, activation='relu')(x)
+x = tf.keras.layers.Dense(512, activation='relu')(x)
+x = tf.keras.layers.Dense(256, activation='relu')(x)
 x = tf.keras.layers.Dense(1024, activation='relu')(x)
 x = tf.keras.layers.Dense(512, activation='relu')(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
@@ -176,7 +178,7 @@ if overfitting > 0.1:
     print(f"⚠️ Possível overfitting detectado (diferença: {overfitting:.4f})")
 else:
     print(f"✅ Modelo bem generalizado (diferença: {overfitting:.4f})")
-    
-    
-    
+
+
+
 print(f"\033[94m{train_generator.class_indices}\033[m")
