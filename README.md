@@ -6,7 +6,7 @@
 
 ## 📋 Descrição
 
-Este projeto desenvolve modelos de deep learning para classificação automática de imagens dermatológicas de hanseníase, utilizando técnicas avançadas de processamento de imagens e redes neurais convolucionais. O sistema é capaz de realizar tanto classificação binária (hanseníase vs. outros) quanto classificação multiclasse (diferentes tipos de hanseníase).
+Este projeto desenvolve modelos de deep learning para classificação automática de imagens dermatológicas de hanseníase, utilizando técnicas avançadas de processamento de imagens e redes neurais convolucionais. O sistema é capaz de realizar tanto classificação binária (hanseníase vs. outros) quanto classificação multiclasse (diferentes tipos de hanseníase). O projeto possui duas abordagens com relação ao treinamento, na primeira é utilizada uma base de imagens originada da Atlas Dermatology, a segunda usa imagens da CO2Wounds-V2. 
 
 ### 🎯 Objetivos
 
@@ -28,6 +28,7 @@ O projeto utiliza uma abordagem otimizada para diagnóstico médico:
 - **Otsu's Thresholding**: Binarização automática para modelos binários
 - **ResNet50**: Arquitetura adaptada para entrada de canal único
 - **Transfer Learning**: Treinamento do zero com arquitetura ResNet50
+- **Visualização da Área de Foco**: Algoritmo que permite uma análise visual da área de foco do modelo sobre as imagens no momento da classificação
 
 ## 🏗️ Estrutura do Projeto
 
@@ -42,11 +43,15 @@ leprosy_classification_models-TCC/
 │       └── train_images_classification/ # Arquivos .npy multiclasse
 ├── 📁 pipelines/                     # Pipeline de pré-processamento
 │   └── pre_processing_images.py      # Conversão YCbCr (canal Y)
-├── 📁 train/                         # Scripts de treinamento
-│   ├── binary_model_from_zero.py     # Modelo binário (do zero, dados com Otsu)
-│   ├── classsification_model_from_zero.py # Modelo multiclasse do zero
-│   ├── binary_model.py               # Modelo binário (pré-treinado, imagens JPG)
-│   └── classification_model.py       # Modelo multiclasse pré-treinado
+├── 📁 train/                                  # Scripts de treinamento
+│   ├── binary_model_from_zero.py              # Modelo binário (do zero, dados com Otsu)
+│   ├── classsification_model_from_zero.py     # Modelo multiclasse do zero
+│   ├── binary_model.py                        # Modelo binário (pré-treinado, imagens JPG)
+│   ├── classification_model.py                # Modelo multiclasse pré-treinado
+|   ├── CO2Wounds-V2_binary_model_from_zero.py # Modelo binário (do zero, dados do CO2 Woulds)
+|   ├── CO2Wounds-V2_binary_model.py           # Modelo binário (pré-treinado, imagens JPG)
+|   ├── fusion_model_CO2Wounds-V2.py           # Modelo baseado em fusão (XGBoost, ResNet50) 
+|   └── 
 ├── 📁 utils/                         # Utilitários
 │   ├── models_to_pkl.py              # Salvamento/carregamento de modelos
 │   └── model_analysis.py             # Análise e visualização
@@ -56,7 +61,9 @@ leprosy_classification_models-TCC/
 ├── 📁 notebooks/                     # Jupyter notebooks
 │   ├── from_zero/                    # Experimentos do zero
 │   ├── pre_traineds/                 # Experimentos pré-treinados
-│   └── pré-processing_images/        # Análise de pré-processamento
+│   ├── pré-processing_images/        # Análise de pré-processamento
+    └──visualization_of_models_focus/ # Análise visual dos modelos
+|
 ├── analyze_models.py                 # Script de análise de modelos
 ├── README.md                         # Este arquivo
 ├── README_ANALYSIS.md                # Documentação da análise
