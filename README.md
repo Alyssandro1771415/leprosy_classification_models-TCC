@@ -53,30 +53,13 @@ leprosy_classification_models-TCC/
 |   |    |   |         └── 📁 outros
 │   |    │   └── 📁 train_images_classification/ # Dataset multiclasse (7 tipos)
 |   |    |        |
-|   |    |        ├── 📁 test/
-|   |    |        |    ├── 📁 leprosy borderline
-|   |    |        |    ├── 📁 leprosy ideterminate
-|   |    |        |    ├── 📁 leprosy lepromatous
-|   |    |        |    ├── 📁 leprosy neural
-|   |    |        |    ├── 📁 leprosy tuberculoide
-|   |    |        |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |    |        |    └── 📁 stasis eczema and leprosy tuberculoid
-|   |    |        ├──  📁 train/
-|   |    |        |    ├── 📁 leprosy borderline
-|   |    |        |    ├── 📁 leprosy ideterminate
-|   |    |        |    ├── 📁 leprosy lepromatous
-|   |    |        |    ├── 📁 leprosy neural
-|   |    |        |    ├── 📁 leprosy tuberculoide
-|   |    |        |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |    |        |    └── 📁 stasis eczema and leprosy tuberculoid
-|   |    |        └──  📁 val/
-|   |    |             ├── 📁 leprosy borderline
-|   |    |             ├── 📁 leprosy ideterminate
-|   |    |             ├── 📁 leprosy lepromatous
-|   |    |             ├── 📁 leprosy neural
-|   |    |             ├── 📁 leprosy tuberculoide
-|   |    |             ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |    |             └── 📁 stasis eczema and leprosy tuberculoid
+|   |    |        ├── 📁 leprosy borderline
+|   |    |        ├── 📁 leprosy ideterminate
+|   |    |        ├── 📁 leprosy lepromatous
+|   |    |        ├── 📁 leprosy neural
+|   |    |        ├── 📁 leprosy tuberculoide
+|   |    |        ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |    |        └── 📁 stasis eczema and leprosy tuberculoid
 │   |    └── 📁 processed/                    # Imagens passadas pelo algoritmo de pré-processamento
 │   |         ├── 📁 train_images_binary/      # Arquivos .npy binários
 |   |         |   |
@@ -91,30 +74,13 @@ leprosy_classification_models-TCC/
 |   |         |        └── 📁 outros
 │   |         └── 📁 train_images_classification/ # Arquivos .npy multiclasse
 |   |             |
-|   |             ├── 📁 test/
-|   |             |    ├── 📁 leprosy borderline
-|   |             |    ├── 📁 leprosy ideterminate
-|   |             |    ├── 📁 leprosy lepromatous
-|   |             |    ├── 📁 leprosy neural
-|   |             |    ├── 📁 leprosy tuberculoide
-|   |             |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |             |    └── 📁 stasis eczema and leprosy tuberculoid
-|   |             ├──  📁 train/
-|   |             |    ├── 📁 leprosy borderline
-|   |             |    ├── 📁 leprosy ideterminate
-|   |             |    ├── 📁 leprosy lepromatous
-|   |             |    ├── 📁 leprosy neural
-|   |             |    ├── 📁 leprosy tuberculoide
-|   |             |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |             |    └── 📁 stasis eczema and leprosy tuberculoid
-|   |             └──  📁 val/
-|   |                  ├── 📁 leprosy borderline
-|   |                  ├── 📁 leprosy ideterminate
-|   |                  ├── 📁 leprosy lepromatous
-|   |                  ├── 📁 leprosy neural
-|   |                  ├── 📁 leprosy tuberculoide
-|   |                  ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
-|   |                  └── 📁 stasis eczema and leprosy tuberculoid
+|   |             ├── 📁 leprosy borderline
+|   |             ├── 📁 leprosy ideterminate
+|   |             ├── 📁 leprosy lepromatous
+|   |             ├── 📁 leprosy neural
+|   |             ├── 📁 leprosy tuberculoide
+|   |             ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |             └── 📁 stasis eczema and leprosy tuberculoid
 |   └── 📁 CO2Wounds-V2 # Imagens advindas da base da plataforma Kaggle (CO2Wounds-V2)
 |       |
 │       ├── 📁 raw/                          # Imagens originais
