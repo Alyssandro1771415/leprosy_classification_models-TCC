@@ -6,7 +6,7 @@
 
 ## 📋 Descrição
 
-Este projeto desenvolve modelos de deep learning para classificação automática de imagens dermatológicas de hanseníase, utilizando técnicas avançadas de processamento de imagens e redes neurais convolucionais. O sistema é capaz de realizar tanto classificação binária (hanseníase vs. outros) quanto classificação multiclasse (diferentes tipos de hanseníase). O projeto possui duas abordagens com relação ao treinamento, na primeira é utilizada uma base de imagens originada da Atlas Dermatology, a segunda usa imagens da CO2Wounds-V2. 
+Este projeto desenvolve modelos de deep learning para classificação automática de imagens dermatológicas de hanseníase, utilizando técnicas avançadas de processamento de imagens e redes neurais convolucionais. O sistema é capaz de realizar tanto classificação binária (hanseníase vs. outros) quanto classificação multiclasse (diferentes tipos de hanseníase). O projeto possui duas abordagens com relação ao treinamento, na primeira é utilizada uma base de imagens originada da Atlas Dermatology, a segunda usa imagens da CO2Wounds-V2.
 
 ### 🎯 Objetivos
 
@@ -35,12 +35,22 @@ O projeto utiliza uma abordagem otimizada para diagnóstico médico:
 ```
 leprosy_classification_models-TCC/
 ├── 📁 data/                          # Dados do projeto
-│   ├── raw/                          # Imagens originais
-│   │   ├── train_images_binary/      # Dataset binário (leprosy, outros)
-│   │   └── train_images_classification/ # Dataset multiclasse (7 tipos)
-│   └── processed/                    # Imagens processadas (canal Y)
-│       ├── train_images_binary/      # Arquivos .npy binários
-│       └── train_images_classification/ # Arquivos .npy multiclasse
+|   |
+|   |
+|   ├── 📁 Atlas_Dermatology # Imagens advindas da base da plataforma Atlas Dermatology
+|   |    |
+│   |    ├── 📁 raw/                          # Imagens originais
+│   |    │   ├── 📁 train_images_binary/      # Dataset binário (leprosy, outros)
+│   |    │   └── 📁 train_images_classification/ # Dataset multiclasse (7 tipos)
+│   |    └── 📁 processed/                    # Imagens passadas pelo algoritmo de pré-processamento
+│   |         ├── 📁 train_images_binary/      # Arquivos .npy binários
+│   |         └── 📁 train_images_classification/ # Arquivos .npy multiclasse
+|   └── 📁 CO2Wounds-V2 # Imagens advindas da base da plataforma Kaggle (CO2Wounds-V2)
+|       |
+│       ├── 📁 raw/                          # Imagens originais
+│       │   └── 📁 train_images_binary/      # Dataset binário (leprosy, outros)
+│       └── 📁 processed/                    # Imagens passadas pelo algoritmo de pré-processamento
+│            └── 📁 train_images_binary/      # Arquivos .npy binários
 ├── 📁 pipelines/                     # Pipeline de pré-processamento
 │   └── pre_processing_images.py      # Conversão YCbCr (canal Y)
 ├── 📁 train/                                  # Scripts de treinamento
@@ -50,8 +60,8 @@ leprosy_classification_models-TCC/
 │   ├── classification_model.py                # Modelo multiclasse pré-treinado
 |   ├── CO2Wounds-V2_binary_model_from_zero.py # Modelo binário (do zero, dados do CO2 Woulds)
 |   ├── CO2Wounds-V2_binary_model.py           # Modelo binário (pré-treinado, imagens JPG)
-|   ├── fusion_model_CO2Wounds-V2.py           # Modelo baseado em fusão (XGBoost, ResNet50) 
-|   └── 
+|   ├── fusion_model_CO2Wounds-V2.py           # Modelo baseado em fusão (XGBoost, ResNet50)
+|   └──
 ├── 📁 utils/                         # Utilitários
 │   ├── models_to_pkl.py              # Salvamento/carregamento de modelos
 │   └── model_analysis.py             # Análise e visualização
