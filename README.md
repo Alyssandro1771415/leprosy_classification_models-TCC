@@ -41,18 +41,108 @@ leprosy_classification_models-TCC/
 |   |    |
 │   |    ├── 📁 raw/                          # Imagens originais
 │   |    │   ├── 📁 train_images_binary/      # Dataset binário (leprosy, outros)
+|   |    |   |    |
+|   |    |   |    ├── 📁 test/
+|   |    |   |    |    ├── 📁 leprosy
+|   |    |   |    |    └── 📁 outros
+|   |    |   |    ├──  📁 train/
+|   |    |   |    |    ├── 📁 leprosy
+|   |    |   |    |    └── 📁 outros
+|   |    |   |    └──  📁 val/
+|   |    |   |         ├── 📁 leprosy
+|   |    |   |         └── 📁 outros
 │   |    │   └── 📁 train_images_classification/ # Dataset multiclasse (7 tipos)
+|   |    |        |
+|   |    |        ├── 📁 test/
+|   |    |        |    ├── 📁 leprosy borderline
+|   |    |        |    ├── 📁 leprosy ideterminate
+|   |    |        |    ├── 📁 leprosy lepromatous
+|   |    |        |    ├── 📁 leprosy neural
+|   |    |        |    ├── 📁 leprosy tuberculoide
+|   |    |        |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |    |        |    └── 📁 stasis eczema and leprosy tuberculoid
+|   |    |        ├──  📁 train/
+|   |    |        |    ├── 📁 leprosy borderline
+|   |    |        |    ├── 📁 leprosy ideterminate
+|   |    |        |    ├── 📁 leprosy lepromatous
+|   |    |        |    ├── 📁 leprosy neural
+|   |    |        |    ├── 📁 leprosy tuberculoide
+|   |    |        |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |    |        |    └── 📁 stasis eczema and leprosy tuberculoid
+|   |    |        └──  📁 val/
+|   |    |             ├── 📁 leprosy borderline
+|   |    |             ├── 📁 leprosy ideterminate
+|   |    |             ├── 📁 leprosy lepromatous
+|   |    |             ├── 📁 leprosy neural
+|   |    |             ├── 📁 leprosy tuberculoide
+|   |    |             ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |    |             └── 📁 stasis eczema and leprosy tuberculoid
 │   |    └── 📁 processed/                    # Imagens passadas pelo algoritmo de pré-processamento
 │   |         ├── 📁 train_images_binary/      # Arquivos .npy binários
+|   |         |   |
+|   |         |   ├── 📁 test/
+|   |         |   |    ├── 📁 leprosy
+|   |         |   |    └── 📁 outros
+|   |         |   ├── 📁 train/
+|   |         |   |    ├── 📁 leprosy
+|   |         |   |    └── 📁 outros
+|   |         |   └── 📁 val/
+|   |         |        ├── 📁 leprosy
+|   |         |        └── 📁 outros
 │   |         └── 📁 train_images_classification/ # Arquivos .npy multiclasse
+|   |             |
+|   |             ├── 📁 test/
+|   |             |    ├── 📁 leprosy borderline
+|   |             |    ├── 📁 leprosy ideterminate
+|   |             |    ├── 📁 leprosy lepromatous
+|   |             |    ├── 📁 leprosy neural
+|   |             |    ├── 📁 leprosy tuberculoide
+|   |             |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |             |    └── 📁 stasis eczema and leprosy tuberculoid
+|   |             ├──  📁 train/
+|   |             |    ├── 📁 leprosy borderline
+|   |             |    ├── 📁 leprosy ideterminate
+|   |             |    ├── 📁 leprosy lepromatous
+|   |             |    ├── 📁 leprosy neural
+|   |             |    ├── 📁 leprosy tuberculoide
+|   |             |    ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |             |    └── 📁 stasis eczema and leprosy tuberculoid
+|   |             └──  📁 val/
+|   |                  ├── 📁 leprosy borderline
+|   |                  ├── 📁 leprosy ideterminate
+|   |                  ├── 📁 leprosy lepromatous
+|   |                  ├── 📁 leprosy neural
+|   |                  ├── 📁 leprosy tuberculoide
+|   |                  ├── 📁 leprosy tuberculoid-nodular (leprosy of childhood)
+|   |                  └── 📁 stasis eczema and leprosy tuberculoid
 |   └── 📁 CO2Wounds-V2 # Imagens advindas da base da plataforma Kaggle (CO2Wounds-V2)
 |       |
 │       ├── 📁 raw/                          # Imagens originais
 │       │   └── 📁 train_images_binary/      # Dataset binário (leprosy, outros)
+|       |       |
+|       |       ├── 📁 test/
+|       |       |    ├── 📁 leprosy
+|       |       |    └── 📁 outros
+|       |       ├──  📁 train/
+|       |       |    ├── 📁 leprosy
+|       |       |    └── 📁 outros
+|       |       └──  📁 val/
+|       |             ├── 📁 leprosy
+|       |             └── 📁 outros
 │       └── 📁 processed/                    # Imagens passadas pelo algoritmo de pré-processamento
 │            └── 📁 train_images_binary/      # Arquivos .npy binários
+|                 |
+|                 ├── 📁 test/
+|                 |    ├── 📁 leprosy
+|                 |    └── 📁 outros
+|                 ├──  📁 train/
+|                 |    ├── 📁 leprosy
+|                 |    └── 📁 outros
+|                 └──  📁 val/
+|                       ├── 📁 leprosy
+|                       └── 📁 outros
 ├── 📁 pipelines/                     # Pipeline de pré-processamento
-│   └── pre_processing_images.py      # Conversão YCbCr (canal Y)
+│   └── pre_processing_images.py
 ├── 📁 train/                                  # Scripts de treinamento
 │   ├── binary_model_from_zero.py              # Modelo binário (do zero, dados com Otsu)
 │   ├── classsification_model_from_zero.py     # Modelo multiclasse do zero
@@ -72,7 +162,7 @@ leprosy_classification_models-TCC/
 │   ├── from_zero/                    # Experimentos do zero
 │   ├── pre_traineds/                 # Experimentos pré-treinados
 │   ├── pré-processing_images/        # Análise de pré-processamento
-    └──visualization_of_models_focus/ # Análise visual dos modelos
+|   └──visualization_of_models_focus/ # Análise visual dos modelos
 |
 ├── analyze_models.py                 # Script de análise de modelos
 ├── README.md                         # Este arquivo
@@ -100,6 +190,7 @@ python setup.py
 - Python 3.8+
 - pip ou conda
 - GPU (opcional, mas recomendado)
+- UV 0.9+
 
 #### Passos
 
@@ -109,13 +200,13 @@ git clone https://github.com/Alyssandro1771415/leprosy_classification_models-TCC
 cd leprosy_classification_models-TCC
 
 # 2. Crie um ambiente virtual
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
+uv venv
+source .venv/bin/activate  # Linux/Mac
 # ou
-venv\Scripts\activate     # Windows
+.venv\Scripts\activate     # Windows
 
 # 3. Instale as dependências
-pip install -r requirements.txt
+uv sync
 ```
 
 ## 📊 Pipeline de Dados
