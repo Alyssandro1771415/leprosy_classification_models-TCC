@@ -6,6 +6,8 @@ import Layout from "./layout/Layout"
 import Analyze from "./pages/Analyze"
 import About from "./pages/About"
 
+import Footer from "./components/Footer"
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -19,8 +21,8 @@ export default function App() {
 
           <Route path="/about" element={<About/>}></Route>
         </Route>
-
       </Routes>
+      <Footer />
     </BrowserRouter>
   )
 }

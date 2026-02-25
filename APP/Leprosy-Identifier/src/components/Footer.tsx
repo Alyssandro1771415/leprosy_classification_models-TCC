@@ -17,7 +17,7 @@ import logo from "../assets/logo_header.png"
 
 export default function Footer() {
   return (
-    <Box bg="bg.surface" borderTop="1px solid" borderColor="border" mt={10}>
+    <Box bg="bg.surface" borderTop="1px solid" borderColor="border" mt={10} mb={5}>
       <Container maxW="6xl" py={10}>
         <Flex
           direction={{ base: "column", md: "row" }}

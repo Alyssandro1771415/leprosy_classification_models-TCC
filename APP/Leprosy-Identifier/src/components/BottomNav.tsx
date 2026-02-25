@@ -18,7 +18,8 @@ export default function BottomNav() {
       bottom="0"
       left="0"
       w="100%"
-      bg="bg.surface"
+      bg="rgba(255, 255, 255, 0.08)"   // cor translúcida
+      backdropFilter="blur(12px)"      // efeito vidro fosco
       borderTop="1px solid"
       borderColor="border"
       py={2}
