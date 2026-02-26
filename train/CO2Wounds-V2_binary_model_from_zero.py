@@ -76,17 +76,28 @@ def load_npy_dataset(data_dir, target_size=(224, 224)):
     return np.array(images), np.array(labels)
 
 # 3 - Carregando os datasets
-base_path = 'data/CO2Wounds-V2/processed/train_images_binary'
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+base_path = os.path.join(
+    project_root,
+    'data',
+    'CO2Wounds-V2',
+    'processed',
+    'train_images_binary'
+)
+
+print(f"\n📁 Base path detectado: {base_path}")
+
 datasets = {}
 
 for subset in ['train', 'val', 'test']:
     subset_path = os.path.join(base_path, subset)
+
     if os.path.exists(subset_path):
         X, y = load_npy_dataset(subset_path)
         datasets[subset] = (X, y)
         print(f"✅ {subset.upper()} carregado: {len(X)} imagens")
     else:
-        print(f"⚠️ Pasta '{subset}' não encontrada em {base_path}")
+        print(f"❌ Pasta '{subset}' NÃO encontrada em {base_path}")
 
 # Verificações
 if 'train' not in datasets or len(datasets['train'][0]) == 0:

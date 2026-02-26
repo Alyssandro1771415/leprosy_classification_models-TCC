@@ -180,47 +180,57 @@ def process_directory(input_dir, output_dir, image_extensions=None, apply_otsu=F
 
 def batch_process_datasets():
     """
-    Processa todos os datasets do projeto (binário e classificação)
-    Aplica Bilateral Filter em todos + Otsu's Thresholding apenas no dataset binário
+    Processa dataset na estrutura:
+
+    data/
+        CO2Wounds-V2/
+            raw/
+                train_images_binary/
+                    train/
+                        leprosy/
+                        outros/
+                    val/
+                        leprosy/
+                        outros/
+                    test/
+                        leprosy/
+                        outros/
     """
-    print("🔄 PROCESSAMENTO EM LOTE COM BILATERAL FILTER")
+
+    print("🔄 PROCESSAMENTO EM LOTE - CAMINHO ABSOLUTO")
     print("=" * 60)
 
-    datasets = [
-        {
-            'name': 'Dataset Binário (Bilateral Filter + Otsu\'s Thresholding)',
-            'input': 'data/CO2Wounds-V2/raw/train_images_binary/val',
-            'output': 'data/CO2Wounds-V2/processed/train_images_binary/val',
-            'apply_otsu': True,      # Aplica Otsu apenas no binário
-            'apply_bilateral': True  # Aplica Bilateral Filter
-        },
-        {
-            'name': 'Dataset Classificação (Bilateral Filter + Canal Y)',
-            'input': 'data/Atlas_Dermatology/raw/train_images_classification',
-            'output': 'data/Atlas_Dermatology/processed/train_images_classification',
-            'apply_otsu': True,     # Não aplica Otsu na classificação
-            'apply_bilateral': True  # Aplica Bilateral Filter
-        }
-    ]
+    # 🔥 Caminho absoluto baseado no arquivo atual
+    project_root = Path(__file__).resolve().parent.parent
+    base_input = project_root / "data/CO2Wounds-V2/raw/train_images_binary"
+    base_output = project_root / "data/CO2Wounds-V2/processed/train_images_binary"
 
+    print(f"📁 Diretório base detectado: {project_root}")
+    print(f"📥 Base input: {base_input}")
+    print(f"📤 Base output: {base_output}")
+
+    splits = ["train", "val", "test"]
     total_stats = {'total': 0, 'processed': 0, 'errors': 0, 'skipped': 0}
 
-    for dataset in datasets:
-        print(f"\n📊 Processando: {dataset['name']}")
-        print(f"   Entrada: {dataset['input']}")
-        print(f"   Saída: {dataset['output']}")
-        print(f"   Bilateral Filter: {'✅ Ativado' if dataset['apply_bilateral'] else '❌ Desativado'}")
-        print(f"   Otsu's Thresholding: {'✅ Ativado' if dataset['apply_otsu'] else '❌ Desativado'}")
+    for split in splits:
+        input_dir = base_input / split
+        output_dir = base_output / split
 
-        if not os.path.exists(dataset['input']):
-            print(f"   ⚠️ Diretório não encontrado: {dataset['input']}")
+        print(f"\n📂 Split: {split.upper()}")
+        print(f"   Entrada: {input_dir}")
+        print(f"   Saída: {output_dir}")
+
+        if not input_dir.exists():
+            print(f"   ❌ Diretório NÃO encontrado: {input_dir}")
             continue
 
-        stats = process_directory(dataset['input'], dataset['output'],
-                                apply_otsu=dataset['apply_otsu'],
-                                apply_bilateral=dataset['apply_bilateral'])
+        stats = process_directory(
+            input_dir,
+            output_dir,
+            apply_otsu=True,
+            apply_bilateral=True
+        )
 
-        # Atualiza estatísticas totais
         for key in total_stats:
             total_stats[key] += stats[key]
 
@@ -228,21 +238,12 @@ def batch_process_datasets():
         print(f"   ⚠️ Puladas: {stats['skipped']}")
         print(f"   ❌ Erros: {stats['errors']}")
 
-    print(f"\n📊 RESUMO GERAL:")
-    print(f"   Total de imagens: {total_stats['total']}")
-    print(f"   Processadas: {total_stats['processed']}")
-    print(f"   Puladas: {total_stats['skipped']}")
-    print(f"   Erros: {total_stats['errors']}")
-
-    if total_stats['processed'] > 0:
-        print(f"\n✅ Processamento concluído com sucesso!")
-        print(f"   � Bilateral Filter aplicado em TODAS as imagens")
-        print(f"   �📊 Dataset Binário: Bilateral Filter + Canal Y + Otsu's Thresholding")
-        print(f"   📊 Dataset Classificação: Bilateral Filter + Canal Y")
-        print(f"   📏 Formato: Arrays normalizados [0, 1]")
-        print(f"   🎯 Benefícios: Redução de ruído + Preservação de bordas")
-    else:
-        print(f"\n❌ Nenhuma imagem foi processada!")
+    print("\n📊 RESUMO GERAL")
+    print("=" * 60)
+    print(f"Total de imagens: {total_stats['total']}")
+    print(f"Processadas: {total_stats['processed']}")
+    print(f"Puladas: {total_stats['skipped']}")
+    print(f"Erros: {total_stats['errors']}")
 
 if __name__ == "__main__":
     batch_process_datasets()
