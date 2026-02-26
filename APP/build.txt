@@ -1,0 +1,33 @@
+📝 Passo a Passo: Gerar APK (Leprosy-Identifier)
+
+Sempre que você fizer alterações no código do seu app (HTML, CSS, JS/TS, Python/Robyn), siga esta ordem:
+1. Sincronizar as alterações do Frontend
+
+Na raiz do projeto (onde fica o seu package.json), rode:
+Bash
+
+npx cap sync android
+
+Isso vai pegar a sua pasta de build (dist/www) e copiar para dentro da pasta do Android.
+2. Entrar na pasta Android
+Bash
+
+cd android/
+
+3. Garantir que o Java 21 está ativo (Opcional, se der erro de "source release 21")
+
+Se você abriu um novo terminal, pode precisar ativar o Java 21 de novo:
+Bash
+
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+
+4. Gerar o APK
+Bash
+
+./gradlew assembleDebug
+
+5. Localização do arquivo gerado
+
+O seu APK novinho estará sempre em:
+android/app/build/outputs/apk/debug/app-debug.apk
