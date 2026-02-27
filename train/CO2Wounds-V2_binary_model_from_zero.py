@@ -37,7 +37,7 @@ x = tf.keras.layers.Dense(256, activation='relu')(x)
 x = tf.keras.layers.Dense(1024, activation='relu')(x)
 x = tf.keras.layers.Dense(512, activation='relu')(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
-predis = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+predis = tf.keras.layers.Dense(2, activation='softmax')(x)
 
 modelo_binario = tf.keras.Model(inputs=input_layer, outputs=predis)
 
@@ -114,7 +114,7 @@ val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val)).batch(4) if X_v
 # 5 - Compilação
 modelo_binario.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
-    loss='binary_crossentropy',
+    loss='categorical_crossentropy',
     metrics=['accuracy']
 )
 

@@ -49,7 +49,7 @@ x = tf.keras.layers.Dense(512, activation='relu')(x)
 x = tf.keras.layers.Dense(256, activation='relu')(x)
 
 # Aqui estamos setando a camada de predições
-predis = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+predis = tf.keras.layers.Dense(2, activation='softmax')(x)
 
 # Ligando o modelo pré-treinado com a nossa camada densa personalizada
 modelo_binario = tf.keras.Model(inputs = pre_treined_model.input, outputs = predis)
@@ -78,7 +78,7 @@ train_generator = train_datagen.flow_from_directory(
     target_size=(224, 224),
     color_mode='rgb',
     batch_size=8,
-    class_mode='binary',
+    class_mode='categorical',
     shuffle=True
 )
 
@@ -90,7 +90,7 @@ validation_generator = val_datagen.flow_from_directory(
     target_size=(224, 224),
     color_mode='rgb',
     batch_size=8,
-    class_mode='binary',
+    class_mode='categorical',
     shuffle=False
 )
 
@@ -102,13 +102,13 @@ test_generator = test_datagen.flow_from_directory(
     target_size=(224, 224),
     color_mode='rgb',
     batch_size=8,
-    class_mode='binary',
+    class_mode='categorical',
     shuffle=False
 )
 
 train_generator.class_indices
 
-modelo_binario.compile(optimizer='Adam', loss='binary_crossentropy', metrics=['accuracy'])
+modelo_binario.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # reduz a taxa de aprendizado automaticamente quando a métrica de
 # desempenho (como a acurácia ou a loss de validação) para de melhorar
