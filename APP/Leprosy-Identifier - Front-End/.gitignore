@@ -24,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
+# Variáveis de ambiente
+.env
+api.js

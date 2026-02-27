@@ -11,6 +11,11 @@ import {
 import { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
+type ResultType = {
+  detected: boolean
+  probability: number
+}
+
 export default function Analyze() {
   const { state } = useLocation()
   const navigate = useNavigate()
@@ -19,17 +24,47 @@ export default function Analyze() {
   const file = state?.file as File | undefined
 
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<string | null>(null)
+  const [result, setResult] = useState<ResultType | null>(null)
 
-  function handleAnalyze() {
+  async function handleAnalyze() {
     if (!file) return
 
-    setLoading(true)
+    try {
+      setLoading(true)
 
-    setTimeout(() => {
-      setResult("Hanseníase detectada (exemplo)")
+      const formData = new FormData()
+      formData.append("image", file)
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/prediction_data`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Erro na requisição")
+      }
+
+      const data = await response.json()
+
+      const isHanseniase = data.predicted_class !== "outro"
+      const probabilityPercent = Number(
+        (data.probability * 100).toFixed(2)
+      )
+
+      setResult({
+        detected: isHanseniase,
+        probability: probabilityPercent,
+      })
+    } catch (error) {
+      console.error(error)
+      setResult(null)
+      alert("Erro ao analisar imagem")
+    } finally {
       setLoading(false)
-    }, 2000)
+    }
   }
 
   if (!image) {
@@ -45,8 +80,6 @@ export default function Analyze() {
       </Container>
     )
   }
-
-  const isPositive = result?.toLowerCase().includes("detectada")
 
   return (
     <Container py={8}>
@@ -73,12 +106,16 @@ export default function Analyze() {
           <Box
             p={6}
             borderRadius="xl"
-            bg={isPositive ? "red.500" : "green.500"}
+            bg={result.detected ? "red.500" : "green.500"}
             color="white"
             textAlign="center"
           >
             <Text fontSize="lg" fontWeight="bold">
-              {result}
+              Hanseníase detectada: {result.detected ? "Sim" : "Não"}
+            </Text>
+
+            <Text mt={2}>
+              Probabilidade: {result.probability}%
             </Text>
           </Box>
         )}

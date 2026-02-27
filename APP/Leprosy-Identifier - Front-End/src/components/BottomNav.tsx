@@ -16,15 +16,18 @@ export default function BottomNav() {
     <Box
       position="fixed"
       bottom="0"
-      left="0"
-      w="100%"
-      bg="rgba(255, 255, 255, 0.08)"   // cor translúcida
-      backdropFilter="blur(12px)"      // efeito vidro fosco
+      w="90%"
+      left="50%"
+      transform="translateX(-50%)"
+      bg="rgba(255, 255, 255, 0.08)"
+      backdropFilter="blur(12px)"
       borderTop="1px solid"
       borderColor="border"
       py={2}
       px={4}
+      mb={12}
       zIndex="1000"
+      borderRadius={8}
     >
       <Flex justify="space-around" align="center">
         {navItems.map((item) => {
