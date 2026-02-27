@@ -1,16 +1,14 @@
 from robyn import Request, Response
 import json
 
-
-from src.routes.prediction_informations_data import get_predction_data
-
+from src.routes.prediction_informations_data import get_prediction_data
 
 
 def register_routes(server):
 
-    @server.get("/birth_informations_data/:image")
+    @server.post("/prediction_data/")
     async def _(request: Request):
-        return await get_predction_data(request)
+        return await get_prediction_data(request)
 
     @server.get("/")
     async def main(request: Request):

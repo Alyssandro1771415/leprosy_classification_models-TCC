@@ -134,7 +134,7 @@ history = modelo_binario.fit(
 os.makedirs('models', exist_ok=True)
 save_model(modelo_binario, "modelo_binario_do_zero_co2wounds")
 
-with open('./models/modelo_binario_do_zero_history.pkl', 'wb') as f:
+with open('../models/modelo_binario_do_zero_history.pkl', 'wb') as f:
     pickle.dump(history.history, f)
 
 dataset_info = {
@@ -146,7 +146,7 @@ dataset_info = {
     'num_classes': 2
 }
 
-with open('./models/modelo_binario_do_zero_info.pkl', 'wb') as f:
+with open('../models/modelo_binario_do_zero_info.pkl', 'wb') as f:
     pickle.dump(dataset_info, f)
 
 print("✅ Modelo e histórico salvos com sucesso.")

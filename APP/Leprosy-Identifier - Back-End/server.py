@@ -2,7 +2,6 @@ from robyn import Robyn, Request, ALLOW_CORS
 from dotenv import load_dotenv
 import os
 
-from src.middlewares.auth_middleware import auth_middleware
 from src.routes._register_routes import register_routes
 
 load_dotenv()
@@ -12,11 +11,6 @@ ALLOW_CORS(server,
             [os.getenv("CORS_PORT_LINK")],
             headers=["Content-Type", "x-access-token"]
         )
-
-
-@server.before_request()
-async def _auth(request: Request):
-    return await auth_middleware(request)
 
 
 register_routes(server)

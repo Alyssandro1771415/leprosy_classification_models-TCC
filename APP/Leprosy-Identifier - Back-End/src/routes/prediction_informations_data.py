@@ -4,19 +4,18 @@ import json
 
 async def get_prediction_data(request: Request):
 
-    if "image" not in request.files:
+    if not request.files:
         return Response(
             status_code=400,
+            headers={"Content-Type": "application/json"},
             description=json.dumps({"error": "Imagem não enviada"})
         )
 
-    image_file = request.files["image"]
-
-    image_bytes = image_file["content"]
+    image_file = list(request.files.values())[0]
 
     controller = PredictImageClass()
     final_datas_result = controller.get_result_prediction(
-        image=image_bytes
+        image=image_file
     )
 
     return Response(
