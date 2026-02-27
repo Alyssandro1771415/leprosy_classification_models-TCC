@@ -1,0 +1,26 @@
+from src.services.prediction_service import PredictionService
+
+
+class PredictionController:
+
+    def __init__(self):
+        self.prediction_service = PredictionService()
+
+    def save_prediction(
+        self,
+        user_id: str,
+        image_base64: str,
+        prediction: str,
+        confidence: float,
+        model_version: str
+    ):
+        return self.prediction_service.save_prediction(
+            user_id,
+            image_base64,
+            prediction,
+            confidence,
+            model_version
+        )
+
+    def get_user_predictions(self, user_id: str):
+        return self.prediction_service.get_user_predictions(user_id)

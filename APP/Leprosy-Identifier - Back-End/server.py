@@ -3,10 +3,14 @@ from dotenv import load_dotenv
 import os
 
 from src.routes._register_routes import register_routes
+from src.services.firebase_service import FirebaseService
 
 load_dotenv()
 
 server = Robyn(__file__)
+
+FirebaseService.initialize()
+
 ALLOW_CORS(server,
             [os.getenv("CORS_PORT_LINK")],
             headers=["Content-Type", "x-access-token"]

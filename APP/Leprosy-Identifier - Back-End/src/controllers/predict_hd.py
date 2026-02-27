@@ -28,7 +28,7 @@ class PredictImageClass:
         img_vec = self.prepare_image_vector(image)
         probability = self.predict_class(img_vec)
 
-        predicted_class = "leprosy" if probability <= 0.5 else "outro"
+        predicted_class = "outro" if probability <= 0.5 else "leprosy"
 
         return {
             "predicted_class": predicted_class,
@@ -49,4 +49,7 @@ class PredictImageClass:
 
     def predict_class(self, img_vec):
         prediction = self.model.predict(img_vec)
+
+        print(prediction)
+
         return float(prediction[0][0])
