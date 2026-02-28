@@ -6,11 +6,15 @@ import { ChakraProvider } from "@chakra-ui/react"
 import { ThemeProvider } from "next-themes"
 import { system } from "./theme"
 
+import { AuthProvider } from "./contexts/AuthContext.tsx"
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ChakraProvider value={system}>
       <ThemeProvider attribute="class" defaultTheme="dark">
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </ThemeProvider>
     </ChakraProvider>
   </React.StrictMode>

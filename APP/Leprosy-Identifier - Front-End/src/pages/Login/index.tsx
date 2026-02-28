@@ -8,14 +8,41 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
+import { useAuth } from "../../contexts/AuthContext"
 
 import logo_header from "../../assets/logo_header.png"
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login, loginWithGoogle } = useAuth()
 
-  function handleLogin() {
-    navigate("/home")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+
+  async function handleLogin() {
+    try {
+      setLoading(true)
+      await login(email, password)
+      navigate("/home")
+    } catch (error) {
+      alert("Email ou senha inválidos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleGoogleLogin() {
+    try {
+      setLoading(true)
+      await loginWithGoogle()
+      navigate("/home")
+    } catch {
+      alert("Erro no login com Google")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -43,8 +70,10 @@ export default function Login() {
 
           <Stack gap={4}>
             <Input
-              placeholder="Usuário"
+              placeholder="Email"
               size="lg"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               bg="bg.muted"
               border="1px solid"
               borderColor="border"
@@ -54,6 +83,8 @@ export default function Login() {
               placeholder="Senha"
               type="password"
               size="lg"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               bg="bg.muted"
               border="1px solid"
               borderColor="border"
@@ -62,13 +93,33 @@ export default function Login() {
 
           <Button
             size="lg"
-            colorPalette="teal"
+            colorScheme="teal"
             onClick={handleLogin}
+            loading={loading}
           >
             Entrar
           </Button>
 
-          <Text textAlign="center" fontSize="sm" color="fg.muted">
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={handleGoogleLogin}
+            loading={loading}
+          >
+            Entrar com Google
+          </Button>
+
+          <Text
+            textAlign="center"
+            fontSize="sm"
+            color="fg.muted"
+            cursor="pointer"
+            onClick={() => navigate("/register")}
+          >
+            Criar conta
+          </Text>
+
+          <Text textAlign="center" fontSize="xs" color="fg.muted">
             Leprosy Identifier
           </Text>
         </Stack>

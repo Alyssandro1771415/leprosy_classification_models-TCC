@@ -6,6 +6,7 @@ import Layout from "./layout/Layout"
 import Analyze from "./pages/Analyze"
 import About from "./pages/About"
 
+import PrivateRoute from "./routes/PrivateRoute"
 import Footer from "./components/Footer"
 
 export default function App() {
@@ -14,14 +15,19 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
 
-        <Route element={<Layout />}>
+        <Route
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
           <Route path="/home" element={<Home />} />
-
-          <Route path="/analyze" element={<Analyze/>}></Route>
-
-          <Route path="/about" element={<About/>}></Route>
+          <Route path="/analyze" element={<Analyze />} />
+          <Route path="/about" element={<About />} />
         </Route>
       </Routes>
+
       <Footer />
     </BrowserRouter>
   )
