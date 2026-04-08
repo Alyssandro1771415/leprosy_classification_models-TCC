@@ -10,8 +10,8 @@ async def save_prediction(request: Request):
     try:
         body = json.loads(request.body)
 
-        user_id = body.get("userId")
-        image_base64 = body.get("imageBase64")
+        user_id = body.get("user_id")
+        image_base64 = body.get("image_base64")
         prediction = body.get("prediction")
         confidence = body.get("confidence")
         model_version = body.get("modelVersion")
