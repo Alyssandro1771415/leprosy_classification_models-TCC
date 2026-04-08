@@ -5,7 +5,7 @@ import os
 from src.routes._register_routes import register_routes
 from src.services.firebase_service import FirebaseService
 
-from src.middlewares.auth_middleware import auth_middleware
+#from src.middlewares.auth_middleware import auth_middleware
 
 load_dotenv()
 
@@ -23,9 +23,9 @@ ALLOW_CORS(
 )
 
 
-@server.before_request()
-async def _auth(request: Request):
-    return await auth_middleware(request)
+#@server.before_request()
+#async def _auth(request: Request):
+#    return await auth_middleware(request)
 
 
 register_routes(server)

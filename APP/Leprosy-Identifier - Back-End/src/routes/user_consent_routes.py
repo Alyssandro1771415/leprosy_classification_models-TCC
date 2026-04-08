@@ -5,20 +5,22 @@ from src.controllers.user_controller import UserController
 
 
 async def set_user_consent(request: Request):
-
     try:
-        body = json.loads(request.body)
+        body_data = request.body.decode("utf-8") if isinstance(request.body, bytes) else request.body
+        body = json.loads(body_data)
 
-        user_id = body.get("userId")
+        user_id = body.get("user_id")
         email = body.get("email")
-        allow = body.get("allowImageUsage")
+        name = body.get("name")
+        allow = body.get("allow")
 
         if not user_id or allow is None:
             return Response(
                 status_code=400,
                 headers={"Content-Type": "application/json"},
                 description=json.dumps({
-                    "error": "userId e allowImageUsage são obrigatórios"
+                    "error": "user_id e allow são obrigatórios",
+                    "received": body
                 })
             )
 
@@ -27,6 +29,7 @@ async def set_user_consent(request: Request):
         result = controller.set_consent(
             user_id=user_id,
             email=email,
+            name=name,
             allow=allow
         )
 

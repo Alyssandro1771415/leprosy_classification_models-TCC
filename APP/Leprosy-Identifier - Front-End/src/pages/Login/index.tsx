@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { useAuth } from "../../contexts/AuthContext"
 
+import { type UserCredential } from "firebase/auth";
+
 import logo_header from "../../assets/logo_header.png"
 
 export default function Login() {
@@ -35,13 +37,28 @@ export default function Login() {
 
   async function handleGoogleLogin() {
     try {
-      setLoading(true)
-      await loginWithGoogle()
-      navigate("/home")
-    } catch {
-      alert("Erro no login com Google")
+      setLoading(true);
+
+      const result = await loginWithGoogle() as UserCredential;
+      const user = result.user;
+
+      await fetch(`${import.meta.env.VITE_API_URL}/users/consent/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.uid,
+          email: user.email,
+          name: user.displayName,
+          allow: true
+        }),
+      });
+
+      navigate("/home");
+    } catch (error) {
+      console.error(error);
+      alert("Erro no login ou sincronização");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
