@@ -1,24 +1,28 @@
 from src.services.firebase_service import FirebaseService
-from datetime import datetime
-
+from datetime import datetime, timezone
 
 class UserService:
 
     def set_user_consent(self, user_id: str, email: str, allow: bool):
         db = FirebaseService.get_db()
-
         user_ref = db.collection("users").document(user_id)
 
-        user_data = {
-            "email": email,
-            "allowImageUsage": allow,
-            "updatedAt": datetime.utcnow()
-        }
+        now = datetime.now(timezone.utc)
 
-        if not user_ref.get().exists:
-            user_data["createdAt"] = datetime.utcnow()
+        user_snapshot = user_ref.get()
 
-        user_ref.set(user_data, merge=True)
+        if user_snapshot.exists:
+            user_ref.update({
+                "email": email,
+                "AllowImageUsage": allow,
+                "updatedAt": now
+            })
+        else:
+            user_ref.set({
+                "AllowImageUsage": allow,
+                "createdAt": now,
+                "updatedAt": now
+            })
 
         return {
             "userId": user_id,

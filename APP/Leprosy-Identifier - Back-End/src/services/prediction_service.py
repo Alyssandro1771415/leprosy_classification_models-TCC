@@ -34,12 +34,14 @@ class PredictionService:
             "imageBase64": image_base64,
             "prediction": prediction,
             "confidence": confidence,
-            "createdAt": datetime.utcnow(),
+            "createdAt": datetime.now(),
             "modelVersion": model_version,
             "allowForTraining": allow_for_training
         }
 
         user_ref.collection("predictions").document(prediction_id).set(prediction_data)
+
+        print(prediction_id, allow_for_training)
 
         return {
             "predictionId": prediction_id,
