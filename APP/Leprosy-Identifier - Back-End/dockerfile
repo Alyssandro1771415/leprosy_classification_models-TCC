@@ -3,37 +3,35 @@ FROM python:3.12-slim-bookworm
 # 1. Instalar dependências do sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    ca-certificates
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Instalar o uv de forma direta e garantir que ele esteja no PATH
-# Usar a imagem oficial do uv como builder é mais limpo, mas mantendo seu estilo:
+# 2. Instalar o uv
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 RUN sh /uv-installer.sh && rm /uv-installer.sh
-
-# O uv é instalado em /root/.local/bin por padrão
 ENV PATH="/root/.local/bin/:$PATH"
 
-# 3. Configurar diretório de trabalho
+# 3. Configurar diretório de trabalho dentro do container
 WORKDIR /app
 
-# 4. Copiar apenas os arquivos de dependências primeiro (otimiza cache do Docker)
+# 4. Copiar dependências
+# Como o Root Directory do Render já é a pasta do Back-End,
+# estes ficheiros estão na "raiz" do contexto de build.
 COPY pyproject.toml uv.lock ./
 
-# ... (mantenha o início igual)
-
-# 5. Instalar dependências
+# 5. Instalar dependências usando o uv
 RUN uv sync --frozen
 
-# 6. Copiar o restante do código
+# 6. Copiar o restante do código (server.py, pasta src, etc)
 COPY . .
 
-# --- ADICIONE ESTA LINHA AQUI ---
-ENV PYTHONPATH="/app/.venv/lib/python3.12/site-packages"
-# -------------------------------
-
-# 7. Garantir que o ambiente virtual seja usado para executáveis
+# 7. Configurações de ambiente para o Robyn e Python
+ENV PYTHONPATH="/app"
 ENV PATH="/app/.venv/bin:$PATH"
+# Garante que o Robyn use a porta que o Render fornecer
+ENV ROBYN_PORT=$PORT
 
-EXPOSE 5000
-
-CMD ["python", "server.py", "--processes", "2", "--workers", "4"]
+# 8. Execução
+# Removi o --processes e --workers fixos para o plano gratuito não estourar CPU
+# O Render injeta a porta automaticamente na variável $PORT
+CMD ["python", "server.py"]
