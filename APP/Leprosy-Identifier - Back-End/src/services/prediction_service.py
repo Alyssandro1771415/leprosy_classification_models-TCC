@@ -7,6 +7,9 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 class PredictionService:
 
+    def __init__(self):
+            self.db = FirebaseService.get_db()
+
     def save_prediction(
         self,
         user_id: str,
@@ -49,30 +52,25 @@ class PredictionService:
         }
 
     def get_user_predictions(self, user_id: str):
-        db = FirebaseService.get_db()
+            try:
+                docs = self.db.collection("users").document(user_id).collection("predictions").get()
 
-        user_ref = db.collection("users").document(user_id)
-        user_doc = user_ref.get()
+                predictions = []
+                for doc in docs:
+                    data = doc.to_dict()
+                    data['id'] = doc.id
 
-        if not user_doc.exists:
-            raise Exception("Usuário não encontrado")
+                    img_data = data.get('image_base64')
+                    if isinstance(img_data, bytes):
+                        data['image_base64'] = img_data.decode('utf-8')
 
-        predictions_ref = user_ref.collection("predictions") \
-            .order_by("createdAt", direction="DESCENDING")
+                    created_at = data.get('createdAt')
+                    if created_at and hasattr(created_at, 'isoformat'):
+                        data['createdAt'] = created_at.isoformat()
 
-        predictions = predictions_ref.stream()
+                    predictions.append(data)
 
-        results = []
-
-        for doc in predictions:
-            data = doc.to_dict()
-
-            # 🔥 Converter datetime para string ISO
-            if "createdAt" in data and data["createdAt"]:
-                data["createdAt"] = data["createdAt"].isoformat()
-
-            data["predictionId"] = doc.id
-
-            results.append(data)
-
-        return results
+                return predictions
+            except Exception as e:
+                print(f"Erro real no Service: {e}")
+                raise e

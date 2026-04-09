@@ -23,4 +23,5 @@ class PredictionController:
         )
 
     def get_user_predictions(self, user_id: str):
-        return self.prediction_service.get_user_predictions(user_id)
+        result = self.prediction_service.get_user_predictions(user_id)
+        return result

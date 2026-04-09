@@ -7,15 +7,13 @@ import {
   Stack,
   Text,
   Spinner,
+  Separator,
+  Grid,
+  Badge,
 } from "@chakra-ui/react"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
-
-type ResultType = {
-  detected: boolean
-  probability: number
-}
 
 export default function Analyze() {
   const { state } = useLocation()
@@ -26,112 +24,161 @@ export default function Analyze() {
   const file = state?.file as File | undefined
 
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<ResultType | null>(null)
+  const [result, setResult] = useState<any>(null)
+  const [history, setHistory] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
+
+  const fetchHistory = useCallback(async () => {
+    if (!user?.uid) return
+
+    try {
+      setLoadingHistory(true)
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/predictions/history/${user.uid}`
+      )
+
+      if (!response.ok) throw new Error(`Erro: ${response.status}`)
+
+      const data = await response.json()
+
+      if (data && data.predictions) {
+        setHistory(data.predictions)
+      } else if (Array.isArray(data)) {
+        setHistory(data)
+      }
+    } catch (error) {
+      console.error("Erro ao buscar histórico:", error)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    fetchHistory()
+  }, [fetchHistory])
 
   async function handleAnalyze() {
     if (!file || !user) return
 
     try {
       setLoading(true)
-
       const formData = new FormData()
       formData.append("image", file)
 
-      const predResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/prediction_data/`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
-
-      if (!predResponse.ok) throw new Error("Erro na predição")
-      const predData = await predResponse.json()
-
+      const predRes = await fetch(`${import.meta.env.VITE_API_URL}/prediction_data`, {
+        method: "POST",
+        body: formData,
+      })
+      const predData = await predRes.json()
       const isHanseniase = predData.predicted_class !== "outro"
-      const probabilityPercent = Number((predData.probability * 100).toFixed(2))
 
-      setResult({
-        detected: isHanseniase,
-        probability: probabilityPercent,
+      const convRes = await fetch(`${import.meta.env.VITE_API_URL}/image/convert`, {
+        method: "POST",
+        body: formData,
+      })
+      const convData = await convRes.json()
+
+      const saveRes = await fetch(`${import.meta.env.VITE_API_URL}/predictions/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.uid,
+          image_base64: convData.base64,
+          prediction: isHanseniase ? "Hanseníase" : "Outro",
+          confidence: predData.probability,
+          model_version: "v1.0"
+        }),
       })
 
-      const convResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/image/convert/`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
-
-      if (!convResponse.ok) throw new Error("Erro na conversão")
-      const convData = await convResponse.json()
-
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/predictions/save/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.uid,
-            image_base64: convData.base64,
-            prediction: isHanseniase ? "Hanseníase" : "Outro",
-            confidence: predData.probability,
-            model_version: "v1.0"
-          }),
-        }
-      )
-
+      if (saveRes.ok) {
+        setResult({
+          detected: isHanseniase,
+          probability: (predData.probability * 100).toFixed(2)
+        })
+        fetchHistory()
+      }
     } catch (error) {
       console.error(error)
-      alert("Ocorreu um erro durante o processamento.")
+      alert("Erro no processamento")
     } finally {
       setLoading(false)
     }
   }
 
-  if (!image) {
-    return (
-      <Container py={10}>
-        <Button onClick={() => navigate("/home")}>Voltar</Button>
-      </Container>
-    )
-  }
-
   return (
-    <Container py={8}>
-      <Stack gap={6}>
-        <Heading size="lg">Análise da imagem</Heading>
-
-        <Image src={image} borderRadius="xl" objectFit="cover" maxH="320px" />
-
-        <Button
-          colorScheme="teal"
-          size="lg"
-          onClick={handleAnalyze}
-          loading={loading}
-          disabled={loading || !!result}
-        >
-          {loading ? <Spinner size="sm" /> : "Analisar"}
-        </Button>
-
-        {result && (
-          <Box
-            p={6}
-            borderRadius="xl"
-            bg={result.detected ? "red.500" : "green.500"}
-            color="white"
-            textAlign="center"
-          >
-            <Text fontSize="lg" fontWeight="bold">
-              Hanseníase detectada: {result.detected ? "Sim" : "Não"}
-            </Text>
-            <Text mt={2}>Probabilidade: {result.probability}%</Text>
+    <Container py={8} maxW="4xl">
+      <Stack gap={8}>
+        {image && (
+          <Box borderBottom="1px solid" borderColor="gray.100" pb={8}>
+            <Heading size="md" mb={4}>Nova Análise</Heading>
+            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
+              <Image src={image} borderRadius="lg" objectFit="cover" h="300px" />
+              <Stack justify="center">
+                <Button colorScheme="teal" size="lg" onClick={handleAnalyze} loading={loading} disabled={!!result}>
+                  Executar Diagnóstico
+                </Button>
+                {result && (
+                  <Box p={4} borderRadius="md" bg={result.detected ? "red.500" : "green.500"} color="white">
+                    <Text fontWeight="bold">Predição: {result.detected ? "Hanseníase" : "Não Detectado"}</Text>
+                    <Text>Confiança: {result.probability}%</Text>
+                  </Box>
+                )}
+              </Stack>
+            </Grid>
           </Box>
         )}
 
-        <Button variant="ghost" onClick={() => navigate("/home")}>
-          Voltar para Início
+        <Box>
+          <Heading size="md" mb={4}>Histórico Recente</Heading>
+          <Separator mb={6} />
+
+          {loadingHistory ? (
+            <Spinner size="xl" />
+          ) : (
+            <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
+              {history.map((item, index) => {
+                // CORREÇÃO AQUI: Usando item.imageBase64 que é o que vem do seu banco
+                const rawString = item.imageBase64 || "";
+                const cleanBase64 = rawString.replace(/\s/g, '');
+
+                const imageSrc = cleanBase64
+                  ? `data:image/png;base64,${cleanBase64}`
+                  : "https://via.placeholder.com/150";
+
+                return (
+                  <Box key={index} p={3} borderRadius="lg" border="1px solid" borderColor="gray.200">
+                    <Image
+                      src={imageSrc}
+                      borderRadius="md"
+                      h="150px"
+                      w="100%"
+                      style={{ objectFit: "cover" }}
+                      mb={2}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://via.placeholder.com/150"
+                      }}
+                    />
+                    <Badge colorScheme={item.prediction === "Hanseníase" ? "red" : "green"}>
+                      {item.prediction}
+                    </Badge>
+                    <Text fontSize="xs" fontWeight="bold" mt={1}>
+                      Confiança: {item.confidence ? (Number(item.confidence) * 100).toFixed(1) : "0.0"}%
+                    </Text>
+                  </Box>
+                )
+              })}
+            </Grid>
+          )}
+
+          {!loadingHistory && history.length === 0 && (
+            <Text color="gray.500" textAlign="center" py={10}>
+              Nenhum registro encontrado.
+            </Text>
+          )}
+        </Box>
+
+        <Button variant="outline" onClick={() => navigate("/home")}>
+          Voltar para Home
         </Button>
       </Stack>
     </Container>

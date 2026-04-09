@@ -50,6 +50,4 @@ class PredictImageClass:
     def predict_class(self, img_vec):
         prediction = self.model.predict(img_vec)
 
-        print(prediction)
-
         return float(prediction[0][0])
