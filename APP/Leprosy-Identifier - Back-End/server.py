@@ -33,7 +33,7 @@ register_routes(server)
 
 server.start(
     host=os.getenv("ROBYN_HOST"),
-    port=os.getenv("ROBYN_PORT"),
+    port=os.getenv("PORT"),
     keep_alive_timeout=30,
     client_timeout=30
 )
