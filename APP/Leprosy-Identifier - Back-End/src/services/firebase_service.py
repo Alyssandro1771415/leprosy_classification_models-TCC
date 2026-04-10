@@ -8,11 +8,25 @@ class FirebaseService:
     @classmethod
     def initialize(cls):
         if not firebase_admin._apps:
-            cred_path = os.getenv("FIREBASE_CREDENTIALS")
+            env_path = os.getenv("FIREBASE_CREDENTIALS")
+
+            possible_paths = [
+                os.getenv("FIREBASE_CREDENTIALS"),
+                "serviceAccountKey.json",
+                "src/config/serviceAccountKey.json",
+                "/etc/secrets/serviceAccountKey.json"
+            ]
+
+            cred_path = None
+            for path in possible_paths:
+                if path and os.path.exists(path):
+                    cred_path = path
+                    break
 
             if not cred_path:
-                raise Exception("FIREBASE_CREDENTIALS não definido no .env")
+                raise Exception(f"Arquivo de credenciais do Firebase não encontrado. Tentados: {possible_paths}")
 
+            print(f"--- Firebase inicializado usando: {cred_path} ---")
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
 
