@@ -31,12 +31,15 @@ ALLOW_CORS(
 register_routes(server)
 
 
-port_str = os.getenv("PORT") or os.getenv("ROBYN_PORT")
+port_str = os.getenv("PORT")
 
 if not port_str or port_str.strip() == "":
     port = 5000
 else:
-    port = int(port_str)
+    try:
+        port = int(port_str)
+    except ValueError:
+        port = 5000
 
 print(f"--- Iniciando servidor na porta: {port} ---")
 
