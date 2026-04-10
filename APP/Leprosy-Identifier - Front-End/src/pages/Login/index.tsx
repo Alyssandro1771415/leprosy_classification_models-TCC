@@ -42,9 +42,12 @@ export default function Login() {
       const result = await loginWithGoogle() as UserCredential;
       const user = result.user;
 
-      await fetch(`${import.meta.env.VITE_API_URL}/users/consent/`, {
+      await fetch(`https://leprosy-classification-models-tcc.onrender.com/users/consent/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+        },
         body: JSON.stringify({
           user_id: user.uid,
           email: user.email,

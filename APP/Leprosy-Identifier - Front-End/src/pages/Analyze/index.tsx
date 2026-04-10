@@ -34,7 +34,13 @@ export default function Analyze() {
     try {
       setLoadingHistory(true)
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/predictions/history/${user.uid}`
+        `https://leprosy-classification-models-tcc.onrender.com/predictions/history/${user.uid}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+        }
+      }
       )
 
       if (!response.ok) throw new Error(`Erro: ${response.status}`)
@@ -65,22 +71,33 @@ export default function Analyze() {
       const formData = new FormData()
       formData.append("image", file)
 
-      const predRes = await fetch(`${import.meta.env.VITE_API_URL}/prediction_data`, {
+      const predRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/prediction_data`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+        },
         body: formData,
       })
       const predData = await predRes.json()
       const isHanseniase = predData.predicted_class !== "outro"
 
-      const convRes = await fetch(`${import.meta.env.VITE_API_URL}/image/convert`, {
+      const convRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/image/convert`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+        },
         body: formData,
       })
       const convData = await convRes.json()
 
-      const saveRes = await fetch(`${import.meta.env.VITE_API_URL}/predictions/save`, {
+      const saveRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/predictions/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+        },
         body: JSON.stringify({
           user_id: user.uid,
           image_base64: convData.base64,
