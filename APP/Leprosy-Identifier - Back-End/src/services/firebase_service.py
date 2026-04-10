@@ -8,7 +8,9 @@ class FirebaseService:
     @classmethod
     def initialize(cls):
         if not firebase_admin._apps:
-            env_path = os.getenv("FIREBASE_CREDENTIALS")
+            print(f"Arquivos na raiz: {os.listdir('.')}")
+            if os.path.exists('src'):
+                print(f"Arquivos em src: {os.listdir('src')}")
 
             possible_paths = [
                 os.getenv("FIREBASE_CREDENTIALS"),
