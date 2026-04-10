@@ -31,9 +31,13 @@ ALLOW_CORS(
 register_routes(server)
 
 
-server.start(
-    host=os.getenv("ROBYN_HOST", "0.0.0.0"),
-    port=os.getenv("PORT", 5000),
-    keep_alive_timeout=30,
-    client_timeout=30
-)
+port_str = os.getenv("PORT") or os.getenv("ROBYN_PORT")
+
+if not port_str or port_str.strip() == "":
+    port = 5000
+else:
+    port = int(port_str)
+
+print(f"--- Iniciando servidor na porta: {port} ---")
+
+server.start(host="0.0.0.0", port=port)
