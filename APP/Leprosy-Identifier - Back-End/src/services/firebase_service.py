@@ -8,15 +8,14 @@ class FirebaseService:
     @classmethod
     def initialize(cls):
         if not firebase_admin._apps:
-            print(f"Arquivos na raiz: {os.listdir('.')}")
-            if os.path.exists('src'):
-                print(f"Arquivos em src: {os.listdir('src')}")
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            root_dir = os.path.abspath(os.path.join(current_dir, "../../"))
 
             possible_paths = [
-                os.getenv("FIREBASE_CREDENTIALS"),
-                "serviceAccountKey.json",
-                "src/config/serviceAccountKey.json",
-                "/etc/secrets/serviceAccountKey.json"
+                os.path.join(root_dir, "serviceAccountKey.json"),
+                os.path.join(root_dir, "src/config/serviceAccountKey.json"),
+                "/etc/secrets/serviceAccountKey.json",
+                "serviceAccountKey.json"
             ]
 
             cred_path = None
