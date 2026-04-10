@@ -29,7 +29,7 @@ ENV PYTHONPATH="/app"
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Garante que o Robyn use a porta que o Render injetar
-ENV ROBYN_PORT=$PORT
+ENV PORT=$PORT
 
 # 7. Execução
 CMD ["python", "server.py"]
