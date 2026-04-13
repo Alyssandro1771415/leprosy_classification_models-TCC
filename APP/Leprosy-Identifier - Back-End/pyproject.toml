@@ -80,7 +80,7 @@ dependencies = [
     "six==1.17.0",
     "tensorboard==2.20.0",
     "tensorboard-data-server==0.7.2",
-    "tensorflow==2.20.0",
+    "tensorflow-cpu==2.16.1",
     "termcolor==3.3.0",
     "toml==0.10.2",
     "typing-extensions==4.15.0",

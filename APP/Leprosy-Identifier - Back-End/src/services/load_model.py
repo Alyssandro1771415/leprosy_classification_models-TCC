@@ -7,7 +7,6 @@ class PreLoaderModel:
     _initialized = False
 
     model_path = "./src/model/modelo_binario_co2wounds.keras"
-    model_drive_id = "10eNukFTmDIASH_CXwFCcRWKn7vvUAoe1"
 
     def __new__(cls):
         if cls._instance is None:
@@ -21,11 +20,15 @@ class PreLoaderModel:
     def _download_model(self):
         """Baixa o modelo do Google Drive se ele não existir localmente."""
         if not os.path.exists(self.model_path):
+
+            model_drive_id = os.getenv("MODEL_ID")
+
+
             print("🚚 Modelo não encontrado localmente. Iniciando download do Google Drive...")
 
             os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
 
-            url = f'https://drive.google.com/uc?id={self.model_drive_id}'
+            url = f'https://drive.google.com/uc?id={model_drive_id}'
             try:
                 gdown.download(url, self.model_path, quiet=False)
                 print("✅ Download concluído com sucesso!")
