@@ -17,7 +17,7 @@ FirebaseService.initialize()
 
 ALLOW_CORS(
     server,
-    [origins],
+    origins,
     headers=["Content-Type", "x-access-token"],
 )
 
