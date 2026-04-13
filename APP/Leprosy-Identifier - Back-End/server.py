@@ -1,4 +1,4 @@
-from robyn import Robyn, Request, ALLOW_CORS
+from robyn import Robyn, Request, Response, ALLOW_CORS
 from dotenv import load_dotenv
 import os
 
@@ -24,6 +24,13 @@ ALLOW_CORS(
 
 @server.before_request()
 async def _auth(request: Request):
+    if request.method == "OPTIONS":
+        return Response(
+            status_code=200,
+            headers={},
+            description="OK"
+        )
+
     return await auth_middleware(request)
 
 
