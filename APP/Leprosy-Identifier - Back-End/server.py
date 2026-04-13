@@ -4,6 +4,7 @@ import os
 
 from src.routes._register_routes import register_routes
 from src.services.firebase_service import FirebaseService
+from src.services.load_model import PreLoaderModel
 
 from src.middlewares.auth_middleware import auth_middleware
 
@@ -14,6 +15,9 @@ origins = ["*"]
 server = Robyn(__file__)
 
 FirebaseService.initialize()
+
+model_preloader = PreLoaderModel()
+model_preloader.model_loader()
 
 ALLOW_CORS(
     server,
