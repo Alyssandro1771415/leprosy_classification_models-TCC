@@ -36,8 +36,9 @@ export default function Analyze() {
 
     try {
       setLoadingHistory(true)
+      console.log(`${import.meta.env.VITE_API_LINK}/predictions/history/${user.uid}`)
       const response = await fetch(
-        `https://leprosy-classification-models-tcc.onrender.com/predictions/history/${user.uid}`, {
+        `${import.meta.env.VITE_API_LINK}/predictions/history/${user.uid}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +75,7 @@ export default function Analyze() {
       const formData = new FormData()
       formData.append("image", file)
 
-      const predRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/prediction_data`, {
+      const predRes = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_data`, {
         method: "POST",
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
@@ -84,7 +85,7 @@ export default function Analyze() {
       const predData = await predRes.json()
       const isHanseniase = predData.predicted_class !== "outro"
 
-      const convRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/image/convert`, {
+      const convRes = await fetch(`${import.meta.env.VITE_API_LINK}/image/convert`, {
         method: "POST",
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
@@ -93,7 +94,7 @@ export default function Analyze() {
       })
       const convData = await convRes.json()
 
-      const saveRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/predictions/save`, {
+      const saveRes = await fetch(`${import.meta.env.VITE_API_LINK}/predictions/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -42,7 +42,7 @@ export default function Login() {
       const result = await loginWithGoogle() as UserCredential;
       const user = result.user;
 
-      await fetch(`https://leprosy-classification-models-tcc.onrender.com/users/consent/`, {
+      await fetch(`${import.meta.env.API_LINK}/users/consent/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
