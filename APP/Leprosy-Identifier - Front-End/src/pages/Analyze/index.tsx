@@ -28,6 +28,9 @@ export default function Analyze() {
   const [history, setHistory] = useState<any[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
 
+  // Estado para o consentimento
+  const [allowForTraining, setAllowForTraining] = useState("false")
+
   const fetchHistory = useCallback(async () => {
     if (!user?.uid) return
 
@@ -74,7 +77,6 @@ export default function Analyze() {
       const predRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/prediction_data`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
         },
         body: formData,
@@ -85,7 +87,6 @@ export default function Analyze() {
       const convRes = await fetch(`https://leprosy-classification-models-tcc.onrender.com/image/convert`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
         },
         body: formData,
@@ -103,7 +104,8 @@ export default function Analyze() {
           image_base64: convData.base64,
           prediction: isHanseniase ? "Hanseníase" : "Outro",
           confidence: predData.probability,
-          model_version: "v1.0"
+          model_version: "v1.0",
+          allow_for_training: allowForTraining === "true"
         }),
       })
 
@@ -130,10 +132,61 @@ export default function Analyze() {
             <Heading size="md" mb={4}>Nova Análise</Heading>
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
               <Image src={image} borderRadius="lg" objectFit="cover" h="300px" />
-              <Stack justify="center">
-                <Button colorScheme="teal" size="lg" onClick={handleAnalyze} loading={loading} disabled={!!result}>
-                  Executar Diagnóstico
+              <Stack justify="center" gap={4}>
+
+                {/* Seção de Consentimento - Sem fundo e texto cinza claro negrito */}
+                <Box py={2}>
+                  <Text fontSize="sm" mb={4} fontWeight="bold" color="gray.400" lineHeight="tall">
+                    Permito o uso da seguinte imagem para uso posterior de treinamento e aprimoramento da inteligência artificial responsável pelo diagnóstico neste app.
+                  </Text>
+
+                  <Stack direction="row" gap={8}>
+                    <Box as="label" display="flex" alignItems="center" gap={2} cursor="pointer">
+                      <input
+                        type="radio"
+                        name="allowForTraining"
+                        value="true"
+                        checked={allowForTraining === "true"}
+                        onChange={(e) => setAllowForTraining(e.target.value)}
+                        style={{
+                          cursor: "pointer",
+                          accentColor: "#319795",
+                          width: "18px",
+                          height: "18px"
+                        }}
+                      />
+                      <Text fontSize="md" fontWeight="bold" color="gray.400">Sim</Text>
+                    </Box>
+
+                    <Box as="label" display="flex" alignItems="center" gap={2} cursor="pointer">
+                      <input
+                        type="radio"
+                        name="allowForTraining"
+                        value="false"
+                        checked={allowForTraining === "false"}
+                        onChange={(e) => setAllowForTraining(e.target.value)}
+                        style={{
+                          cursor: "pointer",
+                          accentColor: "#319795",
+                          width: "18px",
+                          height: "18px"
+                        }}
+                      />
+                      <Text fontSize="md" fontWeight="bold" color="gray.400">Não</Text>
+                    </Box>
+                  </Stack>
+                </Box>
+
+                <Button
+                  colorScheme="teal"
+                  size="lg"
+                  onClick={handleAnalyze}
+                  loading={loading}
+                  disabled={!!result}
+                >
+                  Realizar Diagnóstico
                 </Button>
+
                 {result && (
                   <Box p={4} borderRadius="md" bg={result.detected ? "red.500" : "green.500"} color="white">
                     <Text fontWeight="bold">Predição: {result.detected ? "Hanseníase" : "Não Detectado"}</Text>
@@ -154,7 +207,6 @@ export default function Analyze() {
           ) : (
             <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
               {history.map((item, index) => {
-                // CORREÇÃO AQUI: Usando item.imageBase64 que é o que vem do seu banco
                 const rawString = item.imageBase64 || "";
                 const cleanBase64 = rawString.replace(/\s/g, '');
 
