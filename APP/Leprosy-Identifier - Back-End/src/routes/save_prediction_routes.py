@@ -15,6 +15,7 @@ async def save_prediction(request: Request):
         prediction = body.get("prediction")
         confidence = body.get("confidence")
         model_version = body.get("modelVersion")
+        allow_for_treining = body.get("allow_for_training")
 
         if not user_id or not image_base64:
             return Response(
@@ -32,7 +33,8 @@ async def save_prediction(request: Request):
             image_base64=image_base64,
             prediction=prediction,
             confidence=confidence,
-            model_version=model_version
+            model_version=model_version,
+            allow_for_treining=allow_for_treining
         )
 
         return Response(
