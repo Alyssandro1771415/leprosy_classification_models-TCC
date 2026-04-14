@@ -28,9 +28,6 @@ class PredictionService:
         if not user_doc.exists:
             raise Exception("Usuário não encontrado")
 
-        user_data = user_doc.to_dict()
-
-
         prediction_id = str(uuid.uuid4())
 
         prediction_data = {
@@ -43,8 +40,6 @@ class PredictionService:
         }
 
         user_ref.collection("predictions").document(prediction_id).set(prediction_data)
-
-        print(prediction_id, allow_for_training)
 
         return {
             "predictionId": prediction_id,
