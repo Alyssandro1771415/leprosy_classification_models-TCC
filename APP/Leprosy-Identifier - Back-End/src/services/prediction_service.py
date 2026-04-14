@@ -16,7 +16,8 @@ class PredictionService:
         image_base64: str,
         prediction: str,
         confidence: float,
-        model_version: str
+        model_version: str,
+        allow_for_training: str
     ):
         db = FirebaseService.get_db()
 
@@ -29,7 +30,6 @@ class PredictionService:
 
         user_data = user_doc.to_dict()
 
-        allow_for_training = user_data.get("allowImageUsage", False)
 
         prediction_id = str(uuid.uuid4())
 

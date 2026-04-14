@@ -12,14 +12,16 @@ class PredictionController:
         image_base64: str,
         prediction: str,
         confidence: float,
-        model_version: str
+        model_version: str,
+        allow_for_training: str
     ):
         return self.prediction_service.save_prediction(
             user_id,
             image_base64,
             prediction,
             confidence,
-            model_version
+            model_version,
+            allow_for_training
         )
 
     def get_user_predictions(self, user_id: str):
