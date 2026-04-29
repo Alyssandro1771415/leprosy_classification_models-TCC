@@ -15,6 +15,12 @@ import { useState, useEffect, useCallback } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 
+function buildImageFormData(file: File) {
+  const formData = new FormData()
+  formData.append("image", file)
+  return formData
+}
+
 export default function Analyze() {
   const { state } = useLocation()
   const navigate = useNavigate()
@@ -72,15 +78,13 @@ export default function Analyze() {
 
     try {
       setLoading(true)
-      const formData = new FormData()
-      formData.append("image", file)
 
       const predRes = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_data`, {
         method: "POST",
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
         },
-        body: formData,
+        body: buildImageFormData(file),
       })
       const predData = await predRes.json()
       const isHanseniase = predData.predicted_class !== "outro"
@@ -90,7 +94,7 @@ export default function Analyze() {
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
         },
-        body: formData,
+        body: buildImageFormData(file),
       })
       const convData = await convRes.json()
 
@@ -111,11 +115,34 @@ export default function Analyze() {
       })
 
       if (saveRes.ok) {
-        setResult({
+        const nextResult = {
           detected: isHanseniase,
           probability: (predData.probability * 100).toFixed(2)
-        })
+        }
+
+        setResult(nextResult)
         fetchHistory()
+
+        const focusRes = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_focus`, {
+          method: "POST",
+          headers: {
+            "x-access-token": import.meta.env.VITE_SECRET_TOKEN
+          },
+          body: buildImageFormData(file),
+        })
+
+        if (!focusRes.ok) throw new Error(`Erro ao gerar foco do modelo: ${focusRes.status}`)
+
+        const focusData = await focusRes.json()
+        const focusPreview = `data:${focusData.mime_type ?? "image/png"};base64,${focusData.focus_base64}`
+
+        navigate("/analyze/focus", {
+          state: {
+            preview: image,
+            focusPreview,
+            result: nextResult,
+          },
+        })
       }
     } catch (error) {
       console.error(error)

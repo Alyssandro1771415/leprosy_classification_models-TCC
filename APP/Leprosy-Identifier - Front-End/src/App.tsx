@@ -5,6 +5,7 @@ import Register from "./pages/Register"
 import Home from "./pages/Home"
 import Layout from "./layout/Layout"
 import Analyze from "./pages/Analyze"
+import ModelFocus from "./pages/ModelFocus"
 import About from "./pages/About"
 
 import PrivateRoute from "./routes/PrivateRoute"
@@ -26,6 +27,7 @@ export default function App() {
         >
           <Route path="/home" element={<Home />} />
           <Route path="/analyze" element={<Analyze />} />
+          <Route path="/analyze/focus" element={<ModelFocus />} />
           <Route path="/about" element={<About />} />
         </Route>
       </Routes>
