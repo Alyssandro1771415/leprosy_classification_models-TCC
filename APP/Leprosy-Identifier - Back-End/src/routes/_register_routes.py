@@ -2,6 +2,7 @@ from robyn import Request, Response
 import json
 
 from .prediction_informations_data_routes import get_prediction_data
+from .prediction_focus_routes import get_prediction_focus
 from .user_consent_routes import set_user_consent
 from .save_prediction_routes import save_prediction
 from .convert_base64_image import handle_image_upload
@@ -17,6 +18,10 @@ def register_routes(server):
     @server.post("/prediction_data/")
     async def _(request: Request):
         return await get_prediction_data(request)
+
+    @server.post("/prediction_focus/")
+    async def _(request: Request):
+        return await get_prediction_focus(request)
 
     @server.post("/predictions/save/")
     async def _(request: Request):
