@@ -1,184 +1,290 @@
+# -*- coding: utf-8 -*-
+"""
+Transfer learning (ResNet50 + ImageNet) for CO2Wounds-V2 binary classification.
+
+--data raw: RGB folders under data/CO2Wounds-V2/raw/train_images_binary/
+--data processed: .npy (canal Y) under data/CO2Wounds-V2/processed/train_images_binary/
+  Must match pipelines/pre_processing_images.batch_process_datasets (Otsu + bilateral).
+"""
+import argparse
+import json
 import os
+import pickle
 import sys
 
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
+import matplotlib
 
-# 1 - Importaçõe
-
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import random
-import seaborn as sns
 import tensorflow as tf
-from utils.models_to_pkl import save_model
-
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
-for gpu in gpus:
-    tf.config.experimental.set_memory_growth(gpu, True)
-
-
-# 2 - Importação do Modelo Pré-Treinado - ResNet50 com pesos do imagenet e sem as camadas densas
-pre_treined_model = tf.keras.applications.ResNet50(weights='imagenet', include_top=False)
-
-tf.keras.mixed_precision.set_global_policy('float32')
-
-# 3 - Criando as Camadas Densas Personalizadas
-
-# Captura da camada densa de saída
-x = pre_treined_model.output
-
-# Pooling com média dos valores dos mapas de características
-x = tf.keras.layers.GlobalAveragePooling2D()(x)
-
-# Atribuimos N neurônios à camada densa e somamos ao x que já tínhamos
-
-x = tf.keras.layers.Dense(1024, activation='relu')(x)
-x = tf.keras.layers.Dense(512, activation='relu')(x)
-x = tf.keras.layers.Dense(256, activation='relu')(x)
-x = tf.keras.layers.Dense(1024, activation='relu')(x)
-x = tf.keras.layers.Dense(512, activation='relu')(x)
-x = tf.keras.layers.Dense(256, activation='relu')(x)
-x = tf.keras.layers.Dense(1024, activation='relu')(x)
-x = tf.keras.layers.Dense(512, activation='relu')(x)
-x = tf.keras.layers.Dense(256, activation='relu')(x)
-
-# Aqui estamos setando a camada de predições
-predis = tf.keras.layers.Dense(2, activation='softmax')(x)
-
-# Ligando o modelo pré-treinado com a nossa camada densa personalizada
-modelo_binario = tf.keras.Model(inputs = pre_treined_model.input, outputs = predis)
-
-for i, layer in enumerate(modelo_binario.layers):
-    print(i, layer)
-
-# 4 - Setando as camadas treinaveis e as que devem ser congeladas
-
-for layer in modelo_binario.layers[:175]:
-    layer.trainable = False
-
-for layer in modelo_binario.layers[175:]:
-    layer.trainable = True
-
-# 5 - Preparação para treinamento e treinamento do modelo nas camadas densas
-
-# --- Gerador para treino ---
-train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input,
-                                   horizontal_flip=True,
-                                   rotation_range=20,
-                                   zoom_range=0.2)
-
-train_generator = train_datagen.flow_from_directory(
-    'data/CO2Wounds-V2/raw/train_images_binary/train',  # agora só a pasta de treino
-    target_size=(224, 224),
-    color_mode='rgb',
-    batch_size=8,
-    class_mode='categorical',
-    shuffle=True
+from utils.co2wounds_data import load_npy_dataset
+from utils.models_to_pkl import save_model
+from utils.tf_gpu import configure_gpu_memory_growth, log_gpu_status, require_gpu_or_exit
+from utils.train_evaluation import (
+    predict_generator_all_batches,
+    predict_tf_dataset_all_batches,
+    sklearn_binary_metrics_json,
 )
 
-# --- Gerador para validação ---
-val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
-validation_generator = val_datagen.flow_from_directory(
-    'data/CO2Wounds-V2/raw/train_images_binary/val',  # pasta de validação
-    target_size=(224, 224),
-    color_mode='rgb',
-    batch_size=8,
-    class_mode='categorical',
-    shuffle=False
-)
-
-# --- Gerador para teste (opcional, se você for avaliar depois) ---
-test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-test_generator = test_datagen.flow_from_directory(
-    'data/CO2Wounds-V2/raw/train_images_binary/test',  # pasta de teste
-    target_size=(224, 224),
-    color_mode='rgb',
-    batch_size=8,
-    class_mode='categorical',
-    shuffle=False
-)
-
-train_generator.class_indices
-
-modelo_binario.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-# reduz a taxa de aprendizado automaticamente quando a métrica de
-# desempenho (como a acurácia ou a loss de validação) para de melhorar
-
-reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
-    monitor='val_loss',        # Pode ser 'val_accuracy' também
-    factor=0.2,                # Fator de redução da taxa (por ex: 0.2 => 1e-3 vira 2e-4)
-    patience=3,                # Espera 3 épocas sem melhora antes de reduzir
-    min_lr=1e-6,               # Valor mínimo da learning rate
-    verbose=1
-)
-
-# Para o treinamento quando não há melhoria na validação
-early_stopping = tf.keras.callbacks.EarlyStopping(
-    monitor='val_loss',        # Monitora a loss de validação
-    patience=5,                # Espera 5 épocas sem melhora antes de parar
-    restore_best_weights=True, # Restaura os melhores pesos encontrados
-    verbose=1                  # Mostra quando para o treinamento
-)
-
-history = modelo_binario.fit(train_generator,
-                     validation_data=validation_generator,
-                     epochs=30,  # Aumentado para dar mais chance de convergir
-                     callbacks=[reduce_lr, early_stopping])
+def _dense_head(x):
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    x = tf.keras.layers.Dense(1024, activation="relu")(x)
+    x = tf.keras.layers.Dense(512, activation="relu")(x)
+    x = tf.keras.layers.Dense(256, activation="relu")(x)
+    return tf.keras.layers.Dense(2, activation="softmax")(x)
 
 
-save_model(modelo_binario, "modelo_binario_co2wounds")
-
-# 6 - Avaliação do Modelo
-
-accuracy = history.history["accuracy"]
-val_accuracy = history.history["val_accuracy"]
-loss = history.history["loss"]
-val_loss = history.history["val_loss"]
-
-plt.figure(figsize=(12, 4))
-
-plt.subplot(1, 2, 1)
-plt.plot(accuracy, label="Acurácia de Treinamento")
-plt.plot(val_accuracy, label="Acurácia de Validação")
-plt.xlabel("Epochs")
-plt.ylabel("Acurácia")
-plt.legend()
-plt.title("Evolução da Acurácia")
-
-plt.subplot(1, 2, 2)
-plt.plot(loss, label="Perda de Treinamento")
-plt.plot(val_loss, label="Perda de Validação")
-plt.xlabel("Epochs")
-plt.ylabel("Perda")
-plt.legend()
-plt.title("Evolução da Perda")
-
-plt.tight_layout()
-plt.show()
-
-print(f"\n📊 Resumo do Treinamento:")
-print(f"Épocas treinadas: {len(accuracy)}")
-print(f"Acurácia final (treino): {accuracy[-1]:.4f}")
-print(f"Acurácia final (validação): {val_accuracy[-1]:.4f}")
-print(f"Loss final (treino): {loss[-1]:.4f}")
-print(f"Loss final (validação): {val_loss[-1]:.4f}")
-
-# Análise de overfitting
-overfitting = accuracy[-1] - val_accuracy[-1]
-if overfitting > 0.1:
-    print(f"⚠️ Possível overfitting detectado (diferença: {overfitting:.4f})")
-else:
-    print(f"✅ Modelo bem generalizado (diferença: {overfitting:.4f})")
+def build_model_raw_transfer():
+    pre_trained = tf.keras.applications.ResNet50(weights="imagenet", include_top=False)
+    x = pre_trained.output
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    out = _dense_head(x)
+    model = tf.keras.Model(inputs=pre_trained.input, outputs=out)
+    for i, layer in enumerate(model.layers):
+        layer.trainable = i >= 175
+    return model
 
 
+def build_model_processed_transfer():
+    inp = tf.keras.layers.Input(shape=(224, 224, 1))
+    ch = tf.keras.layers.Conv2D(3, (1, 1), padding="same", name="channel_expansion")(inp)
+    base = tf.keras.applications.ResNet50(weights="imagenet", include_top=False, input_tensor=ch)
+    x = base.output
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    out = _dense_head(x)
+    model = tf.keras.Model(inputs=inp, outputs=out)
+    unfreeze_from = max(0, len(base.layers) - 40)
+    for i, layer in enumerate(base.layers):
+        layer.trainable = i >= unfreeze_from
+    model.get_layer("channel_expansion").trainable = True
+    return model
 
-print(f"\033[94m{train_generator.class_indices}\033[m")
+
+def parse_args():
+    p = argparse.ArgumentParser(description="CO2Wounds-V2 binary transfer learning")
+    p.add_argument("--data", choices=["raw", "processed"], default="raw")
+    p.add_argument("--require-gpu", action="store_true", help="Exit if no GPU is visible to TF")
+    p.add_argument("--output-name", default=None, help="Base name for .keras and metrics files")
+    p.add_argument("--epochs", type=int, default=30)
+    p.add_argument("--batch-size", type=int, default=8)
+    return p.parse_args()
+
+
+def main():
+    args = parse_args()
+    os.chdir(project_root)
+
+    configure_gpu_memory_growth()
+    log_gpu_status()
+    if args.require_gpu:
+        require_gpu_or_exit()
+
+    tf.keras.mixed_precision.set_global_policy("float32")
+
+    if args.output_name:
+        output_name = args.output_name
+    else:
+        output_name = (
+            "modelo_binario_co2wounds_transfer_raw"
+            if args.data == "raw"
+            else "modelo_binario_co2wounds_transfer_processed"
+        )
+
+    raw_base = os.path.join(project_root, "data", "CO2Wounds-V2", "raw", "train_images_binary")
+    proc_base = os.path.join(project_root, "data", "CO2Wounds-V2", "processed", "train_images_binary")
+
+    metrics = [
+        "accuracy",
+        tf.keras.metrics.AUC(name="auc"),
+        tf.keras.metrics.Precision(name="precision"),
+        tf.keras.metrics.Recall(name="recall"),
+    ]
+
+    if args.data == "raw":
+        modelo_binario = build_model_raw_transfer()
+
+        train_datagen = ImageDataGenerator(
+            preprocessing_function=preprocess_input,
+            horizontal_flip=True,
+            rotation_range=20,
+            zoom_range=0.2,
+        )
+        val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+
+        train_generator = train_datagen.flow_from_directory(
+            os.path.join(raw_base, "train"),
+            target_size=(224, 224),
+            color_mode="rgb",
+            batch_size=args.batch_size,
+            class_mode="categorical",
+            shuffle=True,
+        )
+        validation_generator = val_datagen.flow_from_directory(
+            os.path.join(raw_base, "val"),
+            target_size=(224, 224),
+            color_mode="rgb",
+            batch_size=args.batch_size,
+            class_mode="categorical",
+            shuffle=False,
+        )
+
+        modelo_binario.compile(optimizer="Adam", loss="categorical_crossentropy", metrics=metrics)
+
+        reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.2, patience=3, min_lr=1e-6, verbose=1
+        )
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss", patience=5, restore_best_weights=True, verbose=1
+        )
+
+        history = modelo_binario.fit(
+            train_generator,
+            validation_data=validation_generator,
+            epochs=args.epochs,
+            callbacks=[reduce_lr, early_stopping],
+        )
+
+        y_true, y_prob = predict_generator_all_batches(modelo_binario, validation_generator)
+        class_names = sorted(train_generator.class_indices.keys(), key=lambda k: train_generator.class_indices[k])
+
+    else:
+        modelo_binario = build_model_processed_transfer()
+
+        datasets = {}
+        for subset in ["train", "val", "test"]:
+            subset_path = os.path.join(proc_base, subset)
+            if os.path.exists(subset_path):
+                X, y = load_npy_dataset(subset_path)
+                datasets[subset] = (X, y)
+                print(f"✅ {subset.upper()} carregado: {len(X)} imagens")
+            else:
+                print(f"❌ Pasta '{subset}' NÃO encontrada em {subset_path}")
+
+        if "train" not in datasets or len(datasets["train"][0]) == 0:
+            raise ValueError("Nenhum dado de treino .npy encontrado em processed/")
+
+        X_train, y_train = datasets["train"]
+        X_val, y_val = datasets.get("val", (None, None))
+        if X_val is None or len(X_val) == 0:
+            raise ValueError("Conjunto de validação .npy ausente ou vazio")
+
+        y_train_ohe = tf.keras.utils.to_categorical(y_train, 2)
+        y_val_ohe = tf.keras.utils.to_categorical(y_val, 2)
+
+        def augment_image(x, y):
+            x = tf.image.random_flip_left_right(x)
+            return x, y
+
+        train_dataset = (
+            tf.data.Dataset.from_tensor_slices((X_train, y_train_ohe))
+            .shuffle(1000)
+            .map(augment_image, num_parallel_calls=tf.data.AUTOTUNE)
+            .batch(args.batch_size)
+            .prefetch(tf.data.AUTOTUNE)
+        )
+        val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val_ohe)).batch(args.batch_size)
+
+        modelo_binario.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=1e-4),
+            loss="categorical_crossentropy",
+            metrics=metrics,
+        )
+
+        reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor="val_loss", factor=0.2, patience=3, min_lr=1e-6, verbose=1
+        )
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss", patience=5, restore_best_weights=True, verbose=1
+        )
+
+        history = modelo_binario.fit(
+            train_dataset,
+            validation_data=val_dataset,
+            epochs=args.epochs,
+            callbacks=[reduce_lr, early_stopping],
+        )
+
+        val_eval = tf.data.Dataset.from_tensor_slices((X_val, y_val_ohe)).batch(args.batch_size)
+        y_true, y_prob = predict_tf_dataset_all_batches(modelo_binario, val_eval)
+        class_names = ["leprosy", "outros"]
+
+    save_model(modelo_binario, output_name)
+
+    history_path = os.path.join(project_root, "models", f"{output_name}_history.pkl")
+    with open(history_path, "wb") as f:
+        pickle.dump(history.history, f)
+    print(f"✅ Histórico salvo em: {history_path}")
+
+    metrics_dir = os.path.join(project_root, "results_to_analyse", "metrics")
+    sklearn_binary_metrics_json(
+        y_true,
+        y_prob,
+        class_names,
+        os.path.join(metrics_dir, f"{output_name}_val_sklearn.json"),
+    )
+
+    acc = history.history["accuracy"]
+    val_acc = history.history["val_accuracy"]
+    loss = history.history["loss"]
+    val_loss = history.history["val_loss"]
+
+    plot_dir = os.path.join(project_root, "results_to_analyse", "training_plots")
+    os.makedirs(plot_dir, exist_ok=True)
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(acc, label="Treino")
+    plt.plot(val_acc, label="Validação")
+    plt.xlabel("Épocas")
+    plt.ylabel("Acurácia")
+    plt.legend()
+    plt.title("Acurácia")
+    plt.subplot(1, 2, 2)
+    plt.plot(loss, label="Treino")
+    plt.plot(val_loss, label="Validação")
+    plt.xlabel("Épocas")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.title("Loss")
+    plt.tight_layout()
+    plot_path = os.path.join(plot_dir, f"{output_name}_curves.png")
+    plt.savefig(plot_path, dpi=120)
+    plt.close()
+    print(f"✅ Curvas salvas em: {plot_path}")
+
+    info = {
+        "class_names": list(class_names),
+        "data_mode": args.data,
+        "output_name": output_name,
+        "final_train_acc": float(acc[-1]),
+        "final_val_acc": float(val_acc[-1]),
+    }
+    with open(os.path.join(metrics_dir, f"{output_name}_summary.json"), "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2)
+
+    print(f"\n📊 Resumo: épocas={len(acc)} train_acc={acc[-1]:.4f} val_acc={val_acc[-1]:.4f}")
+
+
+if __name__ == "__main__":
+    main()

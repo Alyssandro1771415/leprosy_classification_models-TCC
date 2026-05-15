@@ -1,6 +1,6 @@
 # 🏥 Modelos de Classificação de Hanseníase - TCC
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10--3.12-blue.svg)](https://python.org)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -114,22 +114,31 @@ leprosy_classification_models-TCC/
 │   ├── classsification_model_from_zero.py     # Modelo multiclasse do zero
 │   ├── binary_model.py                        # Modelo binário (pré-treinado, imagens JPG)
 │   ├── classification_model.py                # Modelo multiclasse pré-treinado
-|   ├── CO2Wounds-V2_binary_model_from_zero.py # Modelo binário (do zero, dados do CO2 Woulds)
-|   ├── CO2Wounds-V2_binary_model.py           # Modelo binário (pré-treinado, imagens JPG)
-|   ├── fusion_model_CO2Wounds-V2.py           # Modelo baseado em fusão (XGBoost, ResNet50)
-|   └──
+│   ├── CO2Wounds-V2_binary_model_from_zero.py # Binário CO2Wounds: `--data raw|processed` (ResNet do zero)
+│   ├── CO2Wounds-V2_binary_model.py           # Binário CO2Wounds: transfer learning ResNet50 ImageNet
+│   ├── fusion_model_CO2Wounds-V2.py           # Modelo baseado em fusão (XGBoost, ResNet50)
+│   └──
 ├── 📁 utils/                         # Utilitários
-│   ├── models_to_pkl.py              # Salvamento/carregamento de modelos
-│   └── model_analysis.py             # Análise e visualização
-├── 📁 models/                        # Modelos treinados
-│   ├── modelo_binario_do_zero.pkl    # Modelo binário + histórico + info
-│   └── modelo_classificacao_do_zero.pkl # Modelo multiclasse + histórico + info
+│   ├── models_to_pkl.py              # Salvamento/carregamento (.keras)
+│   ├── model_analysis.py             # Análise e visualização
+│   ├── tf_gpu.py                     # Verificação de GPU (TensorFlow) e memory growth
+│   ├── gradcam.py                    # Grad-CAM (última camada espacial + overlay)
+│   ├── train_evaluation.py           # Relatório sklearn + predição em geradores
+│   └── co2wounds_data.py             # Carregamento de splits .npy (binário CO2Wounds)
+├── 📁 scripts/                       # Automação (CLI)
+│   ├── run_all_co2wounds_gpu_training.sh   # Os 4 treinos CO2Wounds em sequência (`--require-gpu`)
+│   └── generate_results_to_analyse.py      # Figuras original + Grad-CAM + CSV de predições
+├── 📁 models/                        # Checkpoints `.keras` (gitignored; histórico `.pkl` opcional)
+├── 📁 results_to_analyse/            # Métricas pós-treino e figuras em lote
+│   ├── metrics/                      # `*_val_sklearn.json`, `*_summary.json`
+│   ├── training_plots/               # Curvas de acurácia/loss (PNG)
+│   └── figures/                      # Saída do `generate_results_to_analyse.py`
 ├── 📁 notebooks/                     # Jupyter notebooks
 │   ├── from_zero/                    # Experimentos do zero
 │   ├── pre_traineds/                 # Experimentos pré-treinados
 │   ├── pré-processing_images/        # Análise de pré-processamento
-|   └──visualization_of_models_focus/ # Análise visual dos modelos
-|
+│   └── visualization_of_models_focus/ # Grad-CAM interativo (RGB ou `.npy`; ver seção CO2Wounds)
+│
 ├── analyze_models.py                 # Script de análise de modelos
 ├── README.md                         # Este arquivo
 ├── README_ANALYSIS.md                # Documentação da análise
@@ -146,17 +155,22 @@ leprosy_classification_models-TCC/
 git clone https://github.com/Alyssandro1771415/leprosy_classification_models-TCC.git
 cd leprosy_classification_models-TCC
 
-# 2. Execute o setup automático
+```bash
+# 2. Ambiente com UV (recomendado — ver seção "Instalação Manual (UV)")
+uv venv --python 3.10 && uv sync
+
+# Ou: execute o setup automático (legado)
 python setup.py
 ```
 
-### 🔧 Instalação Manual
+### 🔧 Instalação Manual (UV — recomendado)
+
+O projeto usa **[UV](https://docs.astral.sh/uv/)** para criar o `.venv` e resolver dependências a partir do [`pyproject.toml`](pyproject.toml) (há também [`uv.lock`](uv.lock) para builds reproduzíveis).
 
 #### Pré-requisitos
-- Python 3.8+
-- pip ou conda
-- GPU (opcional, mas recomendado)
-- UV 0.9+
+- **Python 3.10, 3.11 ou 3.12** (intervalo definido em `requires-python` no `pyproject.toml`)
+- **[UV](https://github.com/astral-sh/uv)** instalado (`curl -LsSf https://astral.sh/uv/install.sh | sh` ou pacote do sistema)
+- **GPU NVIDIA** (recomendado para treino; o `pyproject.toml` inclui `tensorflow[and-cuda]`, que traz CUDA/cuDNN compatíveis via pip)
 
 #### Passos
 
@@ -165,15 +179,50 @@ python setup.py
 git clone https://github.com/Alyssandro1771415/leprosy_classification_models-TCC.git
 cd leprosy_classification_models-TCC
 
-# 2. Crie um ambiente virtual
-uv venv
-source .venv/bin/activate  # Linux/Mac
-# ou
-.venv\Scripts\activate     # Windows
+# 2. Crie o ambiente virtual (versão explícita evita surpresas)
+uv venv --python 3.10
 
-# 3. Instale as dependências
+# 3. Instale dependências de runtime (TensorFlow + CUDA + OpenCV, etc.)
 uv sync
+
+# 4. (Opcional) Ferramentas de desenvolvimento / Jupyter
+uv sync --extra dev
+
+# 5. Confirme GPU no TensorFlow
+uv run python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
 ```
+
+Ative o ambiente quando quiser usar `python` direto (sem `uv run`):
+
+```bash
+source .venv/bin/activate   # Linux / macOS
+# .venv\Scripts\activate    # Windows
+```
+
+**Executar scripts sem ativar o venv** (UV resolve o ambiente do projeto):
+
+```bash
+uv run python train/CO2Wounds-V2_binary_model.py --data raw --require-gpu
+uv run python scripts/generate_results_to_analyse.py
+```
+
+#### Apenas CPU (sem NVIDIA)
+
+O lock padrão inclui **`tensorflow[and-cuda]`**. Em máquina só CPU, troque o pacote TensorFlow após um `uv sync` inicial, por exemplo:
+
+```bash
+uv remove tensorflow
+uv add "tensorflow-cpu>=2.16,<2.23"
+uv lock
+```
+
+Não mantenha `tensorflow` e `tensorflow-cpu` instalados ao mesmo tempo.
+
+#### Conferência de GPU
+
+Se `tf.config.list_physical_devices('GPU')` vier vazio, verifique `nvidia-smi`, driver NVIDIA e a [instalação oficial do TensorFlow](https://www.tensorflow.org/install/pip).
+
+> O arquivo [`requirements.txt`](requirements.txt) permanece como referência legada; a fonte de verdade para UV é o **`pyproject.toml`** + **`uv.lock`**.
 
 ## 📊 Pipeline de Dados
 
@@ -210,13 +259,15 @@ y_otsu = process_single_image('path/to/image.jpg', 'output/y_otsu.npy',
 
 ### 🚀 Treinamento dos Modelos
 
+> Com **UV**, use `uv run python …` nos comandos abaixo (ou ative `.venv` e use `python …`).
+
 #### Modelo Binário (Hanseníase vs Outros)
 ```bash
 # Modelo pré-treinado (usa imagens JPG originais)
-python train/binary_model.py
+uv run python train/binary_model.py
 
 # Modelo do zero (usa dados processados com Otsu's Thresholding) - RECOMENDADO
-python train/binary_model_from_zero.py
+uv run python train/binary_model_from_zero.py
 ```
 
 > **💡 Recomendação**: Use `binary_model_from_zero.py` para melhor precisão, pois utiliza dados otimizados com Otsu's Thresholding.
@@ -224,11 +275,79 @@ python train/binary_model_from_zero.py
 #### Modelo de Classificação (7 tipos de hanseníase)
 ```bash
 # Modelo pré-treinado
-python train/classification_model.py
+uv run python train/classification_model.py
 
 # Modelo do zero
-python train/classsification_model_from_zero.py
+uv run python train/classsification_model_from_zero.py
 ```
+
+### 🧪 CO2Wounds-V2 — fluxo atual (raw × processado, GPU e análise)
+
+Os dados em `data/CO2Wounds-V2/processed/` devem ser gerados com o **mesmo** pipeline usado no treino. O lote em `pipelines/pre_processing_images.py` (função `batch_process_datasets`, ao rodar como `__main__`) aplica **Otsu + bilateral** ao conjunto binário.
+
+**Pré-processamento em lote (gera `.npy` a partir de `raw/`):**
+
+```bash
+uv run python pipelines/pre_processing_images.py
+```
+
+**Quatro cenários de treino (cada script cobre `raw` e `processed`):**
+
+| Script | `--data raw` | `--data processed` |
+|--------|--------------|---------------------|
+| `train/CO2Wounds-V2_binary_model.py` | RGB 224×3 + `preprocess_input` (ImageNet) | Canal Y `.npy` + expansão 1→3 + ResNet50 ImageNet |
+| `train/CO2Wounds-V2_binary_model_from_zero.py` | RGB 224×3, ResNet50 **sem** ImageNet | Canal Y `.npy`, ResNet50 **sem** ImageNet |
+
+**Nomes padrão dos arquivos `.keras` em `models/`:**
+
+- `modelo_binario_co2wounds_transfer_raw`
+- `modelo_binario_co2wounds_transfer_processed`
+- `modelo_binario_co2wounds_fromzero_raw`
+- `modelo_binario_co2wounds_fromzero_processed`
+
+**Argumentos úteis (ambos os scripts CO2Wounds):**
+
+- `--data {raw,processed}` — origem dos dados
+- `--require-gpu` — **encerra** se o TensorFlow não enxergar GPU (evita treino longo em CPU por engano)
+- `--output-name NOME` — sobrescreve o nome do checkpoint
+- `--epochs` / `--batch-size` — ajuste fino
+
+**Exemplos (na raiz do repositório):**
+
+```bash
+uv run python train/CO2Wounds-V2_binary_model.py --data raw --require-gpu
+uv run python train/CO2Wounds-V2_binary_model.py --data processed --require-gpu
+uv run python train/CO2Wounds-V2_binary_model_from_zero.py --data processed --require-gpu
+uv run python train/CO2Wounds-V2_binary_model_from_zero.py --data raw --require-gpu
+```
+
+(Com o venv ativado, pode usar `python` no lugar de `uv run python`.)
+
+**Pipeline único dos quatro treinos (bash):**
+
+```bash
+chmod +x scripts/run_all_co2wounds_gpu_training.sh
+./scripts/run_all_co2wounds_gpu_training.sh   # ou: bash scripts/run_all_co2wounds_gpu_training.sh
+```
+
+> Dica: redirecione a saída para acompanhar no terminal (`tee training_pipeline.log`).
+
+**Após o treino**, o projeto grava em `results_to_analyse/`:
+
+- `metrics/<nome>_val_sklearn.json` — `classification_report`, matriz de confusão, ROC-AUC (classe leprosy)
+- `metrics/<nome>_summary.json` — resumo numérico
+- `training_plots/<nome>_curves.png` — curvas de treino/validação
+
+**Figuras Grad-CAM em lote (validação raw + validação processada, só modelos binários 2 classes):**
+
+```bash
+uv run python scripts/generate_results_to_analyse.py
+# limite para teste: uv run python scripts/generate_results_to_analyse.py --max-images 20
+```
+
+Saídas: `results_to_analyse/figures/<modelo>/`, `predictions_manifest.csv`, `skipped_pairs.log` (combinações incoerentes, ex.: modelo 3 canais com pasta só `.npy`).
+
+**Notebooks de foco:** `notebooks/visualization_of_models_focus/`. A raiz do repo é detectada automaticamente; use a variável de ambiente `CO2WOUNDS_MODEL` para o nome do checkpoint **sem** extensão (padrões: `modelo_binario_co2wounds` no notebook RGB e `modelo_binario_do_zero_co2wounds` no notebook `.npy`).
 
 ### 2. Estrutura dos Dados
 
@@ -253,7 +372,7 @@ python train/classsification_model_from_zero.py
 
 ```bash
 # Treinar modelo binário
-python train/binary_model_from_zero.py
+uv run python train/binary_model_from_zero.py
 ```
 
 **Características:**
@@ -268,7 +387,7 @@ python train/binary_model_from_zero.py
 
 ```bash
 # Treinar modelo multiclasse
-python train/classsification_model_from_zero.py
+uv run python train/classsification_model_from_zero.py
 ```
 
 **Características:**
@@ -327,13 +446,15 @@ base_model = tf.keras.applications.ResNet50(weights=None, include_top=False, inp
 - **Overfitting**: Análise automática da diferença treino vs validação
 - **Learning Rate**: Monitoramento e redução automática
 
+**Nos treinos CO2Wounds-V2** (`CO2Wounds-V2_binary_model*.py`), além da acurácia o Keras registra **AUC**, **Precision** e **Recall**; após o `fit`, um passe na validação gera relatório **scikit-learn** (JSON em `results_to_analyse/metrics/`).
+
 ## 🔍 Análise de Modelos
 
 ### Script de Análise Completa
 
 ```bash
 # Analisar modelos treinados
-python analyze_models.py
+uv run python analyze_models.py
 ```
 
 **Funcionalidades:**
@@ -375,6 +496,8 @@ python analyze_models.py
 
 ### 1. Salvamento e Carregamento de Modelos
 
+Os checkpoints são arquivos **`.keras`** em `models/` (via `utils/models_to_pkl.py`). Execute os scripts de treino a partir da **raiz do repositório** para que os caminhos relativos fiquem corretos.
+
 ```python
 from utils.models_to_pkl import save_model, load_model
 
@@ -383,6 +506,16 @@ save_model(model, "meu_modelo")
 
 # Carregar modelo
 model = load_model("meu_modelo")
+```
+
+**GPU (TensorFlow)** — uso em outros scripts:
+
+```python
+from utils.tf_gpu import configure_gpu_memory_growth, log_gpu_status, require_gpu_or_exit
+
+configure_gpu_memory_growth()
+log_gpu_status()
+# require_gpu_or_exit()  # descomente para falhar sem GPU
 ```
 
 ### 2. Análise Programática
@@ -410,14 +543,11 @@ model, history, info = load_model_with_history("modelo_binario_do_zero")
 - **`notebooks/from_zero/`**: Experimentos de treinamento do zero
 - **`notebooks/pre_traineds/`**: Experimentos com modelos pré-treinados
 - **`notebooks/pré-processing_images/`**: Análise do pipeline de pré-processamento
+- **`notebooks/visualization_of_models_focus/`**: Grad-CAM interativo (modelo RGB ImageNet vs. modelo em canal Y `.npy`); usa `utils/gradcam.py` e log de GPU via TensorFlow
 
 ```bash
-# Instalar Jupyter
-pip install jupyter
-
-# Iniciar Jupyter
-jupyter notebook
-
+# Instalar extras de notebook (uma vez): uv sync --extra dev
+uv run jupyter notebook
 # Navegar para a pasta notebooks/
 ```
 

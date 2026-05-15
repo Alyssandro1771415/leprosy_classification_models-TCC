@@ -1,4 +1,6 @@
 # Modelos de Classificação de Hanseníase - TCC
+# Preferência do projeto: use `pyproject.toml` + `uv sync` (ver README).
+# Este ficheiro mantém-se como referência para instalação via pip legado.
 # Dependências principais do projeto
 
 # Automação Web-Scripting

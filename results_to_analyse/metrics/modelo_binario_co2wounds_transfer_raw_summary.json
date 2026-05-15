@@ -1,0 +1,10 @@
+{
+  "class_names": [
+    "leprosy",
+    "outros"
+  ],
+  "data_mode": "raw",
+  "output_name": "modelo_binario_co2wounds_transfer_raw",
+  "final_train_acc": 0.9960220456123352,
+  "final_val_acc": 0.9902507066726685
+}
