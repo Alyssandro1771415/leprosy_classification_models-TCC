@@ -240,3 +240,7 @@ outputs/
 # Cache do matplotlib e seaborn
 .matplotlib/
 .seaborn-data/
+
+
+# JSON's de resultados
+./results_to_analyse/*
