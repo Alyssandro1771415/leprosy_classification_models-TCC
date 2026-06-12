@@ -1,0 +1,9 @@
+# Configurações de experimento Atlas Dermatology
+
+dataset: atlas_dermatology
+task: binary
+data_mode: processed     # raw | processed
+approach: from_zero
+model_name: modelo_binario_do_zero_atlas_dermatology
+epochs: 40
+batch_size: 4

@@ -1,0 +1,10 @@
+# Configurações de experimento CO2Wounds-V2
+
+dataset: co2wounds_v2
+task: binary
+data_mode: raw          # raw | processed
+approach: transfer       # transfer | from_zero
+model_name: modelo_binario_co2wounds_transfer_raw
+epochs: 30
+batch_size: 8
+require_gpu: true
