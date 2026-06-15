@@ -13,13 +13,10 @@ import {
 } from "@chakra-ui/react"
 import { useState, useEffect, useCallback } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import AnalysisDetailDialog from "../../components/AnalysisDetailDialog"
 import { useAuth } from "../../contexts/AuthContext"
-
-function buildImageFormData(file: File) {
-  const formData = new FormData()
-  formData.append("image", file)
-  return formData
-}
+import type { HistoryItem } from "../../types/analysis"
+import { base64ToDataUrl, buildImageFormData } from "../../utils/imageUtils"
 
 export default function Analyze() {
   const { state } = useLocation()
@@ -31,8 +28,10 @@ export default function Analyze() {
 
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<any>(null)
-  const [history, setHistory] = useState<any[]>([])
+  const [history, setHistory] = useState<HistoryItem[]>([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
 
   // Estado para o consentimento
   const [allowForTraining, setAllowForTraining] = useState("false")
@@ -235,15 +234,38 @@ export default function Analyze() {
           ) : (
             <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
               {history.map((item, index) => {
-                const rawString = item.imageBase64 || "";
-                const cleanBase64 = rawString.replace(/\s/g, '');
-
-                const imageSrc = cleanBase64
-                  ? `data:image/png;base64,${cleanBase64}`
-                  : "https://via.placeholder.com/150";
+                const imageSrc = item.imageBase64
+                  ? base64ToDataUrl(item.imageBase64)
+                  : "https://via.placeholder.com/150"
 
                 return (
-                  <Box key={index} p={3} borderRadius="lg" border="1px solid" borderColor="gray.200">
+                  <Box
+                    key={item.id ?? index}
+                    p={3}
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    cursor="pointer"
+                    transition="all 0.2s"
+                    _hover={{
+                      borderColor: "teal.400",
+                      boxShadow: "md",
+                      transform: "translateY(-2px)",
+                    }}
+                    onClick={() => {
+                      setSelectedItem(item)
+                      setDetailOpen(true)
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        setSelectedItem(item)
+                        setDetailOpen(true)
+                      }
+                    }}
+                  >
                     <Image
                       src={imageSrc}
                       borderRadius="md"
@@ -260,6 +282,9 @@ export default function Analyze() {
                     </Badge>
                     <Text fontSize="xs" fontWeight="bold" mt={1}>
                       Confiança: {item.confidence ? (Number(item.confidence) * 100).toFixed(1) : "0.0"}%
+                    </Text>
+                    <Text fontSize="xs" color="teal.600" mt={2}>
+                      Toque para ver detalhes e mapa de calor
                     </Text>
                   </Box>
                 )
@@ -278,6 +303,15 @@ export default function Analyze() {
           Voltar para Home
         </Button>
       </Stack>
+
+      <AnalysisDetailDialog
+        item={selectedItem}
+        open={detailOpen}
+        onClose={() => {
+          setDetailOpen(false)
+          setSelectedItem(null)
+        }}
+      />
     </Container>
   )
 }

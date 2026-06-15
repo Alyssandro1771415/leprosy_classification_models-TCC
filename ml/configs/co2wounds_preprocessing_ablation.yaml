@@ -1,0 +1,30 @@
+# Ablação de pré-processamento — CO2Wounds-V2 (binário, from-zero)
+
+dataset: co2wounds_v2
+task: binary
+approach: from_zero
+data_mode: processed
+
+variants:
+  - name: y_only
+    label: "Canal Y"
+    bilateral: false
+    otsu: false
+  - name: y_bilateral
+    label: "Canal Y + Bilateral"
+    bilateral: true
+    otsu: false
+  - name: y_otsu
+    label: "Canal Y + Otsu"
+    bilateral: false
+    otsu: true
+  - name: y_bilateral_otsu
+    label: "Canal Y + Bilateral + Otsu"
+    bilateral: true
+    otsu: true
+
+output_name_pattern: "modelo_binario_co2wounds_ablation_{variant}"
+processed_root: "data/co2wounds_v2/processed/ablation/{variant}/train_images_binary"
+epochs: 40
+batch_size: 4
+require_gpu: true

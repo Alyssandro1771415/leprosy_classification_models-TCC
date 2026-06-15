@@ -8,19 +8,22 @@ Este script permite analisar os modelos treinados de classificação de hansení
 
 ### Execução simples:
 ```bash
-python analyze_models.py
+cd ml
+uv run python scripts/analyze_models.py
 ```
 
+Modelos do estudo de ablação (`modelo_binario_co2wounds_ablation_*`) ficam em `artifacts/models/co2wounds/`. Métricas JSON em `artifacts/metrics/`.
+
 ### Pré-requisitos:
-- Modelos treinados salvos na pasta `models/`
-- Ambiente virtual ativado (se aplicável)
+- Modelos treinados em `artifacts/models/co2wounds/` (`.keras`)
+- Ambiente configurado (`cd ml && uv sync`)
 - Dependências instaladas (tensorflow, matplotlib, numpy)
 
 ## 📊 O que o script faz
 
 ### 1. **Detecta modelos automaticamente**
-- Procura por arquivos `.pkl` na pasta `models/`
-- Identifica se há histórico e informações do dataset
+- Procura checkpoints `.keras` em `artifacts/models/co2wounds/` e `artifacts/models/atlas/`
+- Identifica se há histórico e informações do dataset (`.pkl`)
 - Mostra status de cada modelo (✅ completo | ⚠️ apenas modelo)
 
 ### 2. **Menu interativo**

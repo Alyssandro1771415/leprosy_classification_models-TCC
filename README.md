@@ -15,7 +15,15 @@ uv venv --python 3.10 && uv sync
 uv run python -c "import leprosy_ml; print(leprosy_ml.get_ml_root())"
 ```
 
-Consulte [`ml/README.md`](ml/README.md) para o fluxo completo de treino.
+Consulte [`ml/README.md`](ml/README.md) para o fluxo completo de treinamento.
+
+### Estudo de ablação (CO2Wounds)
+
+Compara 4 variantes de pré-processamento no canal Y e treina um modelo from-zero por variante. Detalhes em [`ml/docs/preprocessing_ablation.md`](ml/docs/preprocessing_ablation.md).
+
+```bash
+cd ml && bash scripts/run_ablation_pipeline.sh
+```
 
 ## Início rápido (App)
 

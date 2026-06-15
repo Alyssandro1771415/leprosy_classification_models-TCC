@@ -137,6 +137,23 @@ def apply_otsu_thresholding(y_channel):
     return otsu_result / 255.0  # Normaliza para [0, 1]
 ```
 
+### 3. Estudo de ablação (CO2Wounds-V2)
+
+Para o dataset CO2Wounds binário, o projeto inclui um estudo sistemático das combinações de bilateral e Otsu sobre o canal Y. Quatro variantes são geradas em `processed/ablation/` e cada uma recebe um treino ResNet50 from-zero independente.
+
+| Variante | Bilateral | Otsu |
+|----------|-----------|------|
+| `y_only` | ❌ | ❌ |
+| `y_bilateral` | ✅ | ❌ |
+| `y_otsu` | ❌ | ✅ |
+| `y_bilateral_otsu` | ✅ | ✅ |
+
+Ordem de aplicação quando ambas estão ativas: **Bilateral → Otsu**.
+
+Scripts: `run_preprocessing_ablation.py`, `run_co2wounds_training_ablation.sh`, `run_ablation_pipeline.sh`.
+
+Documentação completa: [preprocessing_ablation.md](preprocessing_ablation.md).
+
 ## ⚙️ Configurações de Treinamento
 
 ### Otimizador
