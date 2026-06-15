@@ -32,8 +32,11 @@ class ModelFocusService:
 
     def _make_gradcam_heatmap(self, img_array, pred_index=None):
         grad_model = tf.keras.models.Model(
-            [self.model.inputs],
-            [self.model.get_layer(self.last_conv_layer_name).output, self.model.output]
+            inputs=self.model.inputs,
+            outputs=[
+                self.model.get_layer(self.last_conv_layer_name).output,
+                self.model.output,
+            ],
         )
 
         with tf.GradientTape() as tape:
