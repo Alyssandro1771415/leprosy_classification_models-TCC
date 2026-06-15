@@ -140,7 +140,6 @@ export default function AnalysisDetailDialog({
                     </Heading>
                     <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={3}>
                       <InfoRow label="Data da análise" value={formatDate(item.createdAt)} />
-                      <InfoRow label="Versão do modelo" value={item.modelVersion ?? "—"} />
                       <InfoRow
                         label="Uso para treinamento"
                         value={item.allowForTraining ? "Autorizado" : "Não autorizado"}
