@@ -16,6 +16,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import AnalysisDetailDialog from "../../components/AnalysisDetailDialog"
 import { useAuth } from "../../contexts/AuthContext"
 import type { HistoryItem } from "../../types/analysis"
+import { MODEL_VERSION } from "../../types/analysis"
 import { base64ToDataUrl, buildImageFormData } from "../../utils/imageUtils"
 
 export default function Analyze() {
@@ -108,7 +109,7 @@ export default function Analyze() {
           image_base64: convData.base64,
           prediction: isHanseniase ? "Hanseníase" : "Outro",
           confidence: predData.probability,
-          model_version: "v1.0",
+          model_version: MODEL_VERSION,
           allow_for_training: allowForTraining === "true"
         }),
       })
@@ -133,11 +134,16 @@ export default function Analyze() {
         if (!focusRes.ok) throw new Error(`Erro ao gerar foco do modelo: ${focusRes.status}`)
 
         const focusData = await focusRes.json()
-        const focusPreview = `data:${focusData.mime_type ?? "image/png"};base64,${focusData.focus_base64}`
+        const mimeType = focusData.mime_type ?? "image/png"
+        const focusPreview = `data:${mimeType};base64,${focusData.focus_base64}`
+        const preprocessedPreview = focusData.preprocessed_base64
+          ? `data:${mimeType};base64,${focusData.preprocessed_base64}`
+          : undefined
 
         navigate("/analyze/focus", {
           state: {
             preview: image,
+            preprocessedPreview,
             focusPreview,
             result: nextResult,
           },

@@ -1,0 +1,33 @@
+Passo a passo: gerar APK (Leprosy Identifier)
+
+Sempre que alterar o código do frontend (HTML, CSS, JS/TS), siga esta ordem:
+
+1. Sincronizar o frontend com o Android
+
+Na pasta app/frontend:
+
+    npm run cap:sync
+
+Isso faz o build web (dist/) e copia os assets para o projeto Android.
+
+2. Gerar o APK de debug
+
+    npm run android:debug
+
+Ou manualmente:
+
+    cd android
+    ./gradlew assembleDebug
+
+3. Localização do APK gerado
+
+    android/app/build/outputs/apk/debug/app-debug.apk
+
+4. Abrir no Android Studio (opcional)
+
+    npm run cap:open
+
+5. Java 21 (se aparecer erro de "source release 21")
+
+    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+    export PATH=$JAVA_HOME/bin:$PATH

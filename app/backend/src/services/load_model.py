@@ -6,7 +6,7 @@ class PreLoaderModel:
     _instance = None
     _initialized = False
 
-    model_path = "./src/model/modelo_binario_co2wounds.keras"
+    model_path = "./src/model/modelo_binario_co2wounds_ablation_y_bilateral.keras"
 
     def __new__(cls):
         if cls._instance is None:

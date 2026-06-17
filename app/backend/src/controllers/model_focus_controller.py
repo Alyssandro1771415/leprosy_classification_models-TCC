@@ -21,9 +21,4 @@ class ModelFocusController:
         self._initialized = True
 
     def get_model_focus(self, image: bytes) -> dict:
-        focus_base64 = self.model_focus_service.generate_focus_base64(image)
-
-        return {
-            "focus_base64": focus_base64,
-            "mime_type": "image/png"
-        }
+        return self.model_focus_service.generate_focus_result(image)

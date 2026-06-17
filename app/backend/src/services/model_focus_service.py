@@ -1,10 +1,18 @@
 import base64
 import io
 
+import cv2
 import numpy as np
 import tensorflow as tf
 from PIL import Image
-from tensorflow.keras.applications.resnet50 import preprocess_input
+
+from src.services.preprocessing_service import (
+    open_rgb_image,
+    prepare_preprocessed_png,
+    resize_y_channel,
+    rgb_to_y_bilateral,
+    y_channel_to_display_rgb,
+)
 
 
 class ModelFocusService:
@@ -12,23 +20,27 @@ class ModelFocusService:
         self.model = model
         self.last_conv_layer_name = self._find_last_conv_layer_name()
 
-    def generate_focus_base64(self, image_bytes: bytes) -> str:
-        original_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        img_array = self._prepare_image_array(original_image)
+    def generate_focus_result(self, image_bytes: bytes) -> dict:
+        original_image = open_rgb_image(image_bytes)
+        y_channel = resize_y_channel(rgb_to_y_bilateral(original_image))
+        img_array = {"input_layer": np.expand_dims(y_channel, axis=(0, -1)).astype(np.float32)}
+
         heatmap = self._make_gradcam_heatmap(img_array)
-        focused_image = self._overlay_heatmap(original_image, heatmap)
+        preprocessed_rgb = y_channel_to_display_rgb(y_channel)
+        focused_image = self._overlay_heatmap(preprocessed_rgb, heatmap)
 
+        return {
+            "preprocessed_base64": base64.b64encode(
+                prepare_preprocessed_png(image_bytes)
+            ).decode("utf-8"),
+            "focus_base64": self._image_to_base64(focused_image),
+            "mime_type": "image/png",
+        }
+
+    def _image_to_base64(self, image: Image.Image) -> str:
         buffer = io.BytesIO()
-        focused_image.save(buffer, format="PNG")
-
+        image.save(buffer, format="PNG")
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-    def _prepare_image_array(self, image: Image.Image):
-        resized_image = image.resize((224, 224))
-        img_array = np.array(resized_image, dtype=np.float32)
-        img_array = np.expand_dims(img_array, axis=0)
-
-        return preprocess_input(img_array)
 
     def _make_gradcam_heatmap(self, img_array, pred_index=None):
         grad_model = tf.keras.models.Model(
@@ -66,29 +78,25 @@ class ModelFocusService:
 
         return heatmap.numpy()
 
-    def _overlay_heatmap(self, image: Image.Image, heatmap, alpha=0.5, gamma=2.0, percentile=80):
-        image_array = np.array(image, dtype=np.float32)
-
-        heatmap_image = Image.fromarray(np.uint8(heatmap * 255))
-        heatmap_image = heatmap_image.resize(image.size, Image.Resampling.BILINEAR)
-        heatmap_resized = np.array(heatmap_image, dtype=np.float32) / 255.0
+    def _overlay_heatmap(self, image_array: np.ndarray, heatmap, alpha=0.5, gamma=2.0, percentile=80):
+        heatmap_resized = cv2.resize(
+            heatmap,
+            (image_array.shape[1], image_array.shape[0]),
+            interpolation=cv2.INTER_LINEAR,
+        )
 
         max_val = np.percentile(heatmap_resized, percentile)
         heatmap_resized = np.clip(heatmap_resized / (max_val + 1e-8), 0, 1)
         heatmap_resized = np.power(heatmap_resized, gamma)
 
-        colored_heatmap = self._apply_jet_colormap(heatmap_resized)
-        superimposed = (alpha * colored_heatmap) + ((1 - alpha) * image_array)
+        heatmap_u8 = np.uint8(255 * heatmap_resized)
+        colored_heatmap = cv2.applyColorMap(heatmap_u8, cv2.COLORMAP_JET)
+        colored_heatmap = cv2.cvtColor(colored_heatmap, cv2.COLOR_BGR2RGB)
+
+        superimposed = (alpha * colored_heatmap) + ((1 - alpha) * image_array.astype(np.float32))
         superimposed = np.clip(superimposed, 0, 255).astype(np.uint8)
 
         return Image.fromarray(superimposed)
-
-    def _apply_jet_colormap(self, heatmap):
-        red = np.clip(1.5 - np.abs((4 * heatmap) - 3), 0, 1)
-        green = np.clip(1.5 - np.abs((4 * heatmap) - 2), 0, 1)
-        blue = np.clip(1.5 - np.abs((4 * heatmap) - 1), 0, 1)
-
-        return np.stack([red, green, blue], axis=-1) * 255.0
 
     def _find_last_conv_layer_name(self):
         for layer in reversed(self.model.layers):

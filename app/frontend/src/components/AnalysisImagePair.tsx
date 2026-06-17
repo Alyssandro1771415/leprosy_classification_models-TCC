@@ -2,31 +2,81 @@ import { Badge, Box, Grid, Heading, Image } from "@chakra-ui/react"
 
 type AnalysisImagePairProps = {
   originalSrc: string
+  preprocessedSrc?: string | null
   focusSrc?: string | null
   loadingFocus?: boolean
 }
 
-export default function AnalysisImagePair({
-  originalSrc,
-  focusSrc,
-  loadingFocus = false,
-}: AnalysisImagePairProps) {
+function ImagePanel({
+  title,
+  src,
+  alt,
+  placeholder,
+}: {
+  title: string
+  src?: string | null
+  alt: string
+  placeholder?: string
+}) {
   return (
-    <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-      <Box>
-        <Heading size="sm" mb={3}>
-          Imagem Original
-        </Heading>
+    <Box>
+      <Heading size="sm" mb={3}>
+        {title}
+      </Heading>
+      {src ? (
         <Image
-          src={originalSrc}
-          alt="Imagem original enviada para classificação"
+          src={src}
+          alt={alt}
           borderRadius="lg"
           objectFit="contain"
           w="100%"
           maxH="360px"
           bg="gray.50"
         />
-      </Box>
+      ) : (
+        <Box
+          borderRadius="lg"
+          bg="gray.50"
+          h="360px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          color="gray.500"
+          fontSize="sm"
+          textAlign="center"
+          px={4}
+        >
+          {placeholder}
+        </Box>
+      )}
+    </Box>
+  )
+}
+
+export default function AnalysisImagePair({
+  originalSrc,
+  preprocessedSrc,
+  focusSrc,
+  loadingFocus = false,
+}: AnalysisImagePairProps) {
+  const columns = preprocessedSrc || loadingFocus ? { base: "1fr", md: "repeat(3, 1fr)" } : { base: "1fr", md: "1fr 1fr" }
+
+  return (
+    <Grid templateColumns={columns} gap={6}>
+      <ImagePanel
+        title="Imagem Original"
+        src={originalSrc}
+        alt="Imagem original enviada para classificação"
+      />
+
+      {(preprocessedSrc || loadingFocus) && (
+        <ImagePanel
+          title="Pré-processamento (Canal Y + Bilateral)"
+          src={preprocessedSrc}
+          alt="Imagem após extração do canal Y e filtro bilateral"
+          placeholder="Gerando pré-processamento..."
+        />
+      )}
 
       <Box>
         <Heading size="sm" mb={3}>
@@ -49,7 +99,7 @@ export default function AnalysisImagePair({
           <>
             <Image
               src={focusSrc}
-              alt="Mapa de calor Grad-CAM sobre a imagem analisada"
+              alt="Mapa de calor Grad-CAM sobre a imagem pré-processada"
               borderRadius="lg"
               objectFit="contain"
               w="100%"

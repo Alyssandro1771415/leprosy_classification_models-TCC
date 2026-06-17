@@ -14,6 +14,7 @@ import type { AnalyzeResult } from "../../types/analysis"
 
 type FocusState = {
   preview?: string
+  preprocessedPreview?: string
   focusPreview?: string
   result?: AnalyzeResult
 }
@@ -39,7 +40,8 @@ export default function ModelFocus() {
         <Box>
           <Heading size="lg" mb={2}>Foco do Modelo</Heading>
           <Text color="gray.500">
-            A imagem abaixo mostra as regiões que mais influenciaram a decisão do modelo.
+            Visualização da imagem original, do pré-processamento (canal Y + bilateral) e das
+            regiões que mais influenciaram a decisão do modelo.
           </Text>
         </Box>
 
@@ -54,6 +56,7 @@ export default function ModelFocus() {
 
         <AnalysisImagePair
           originalSrc={focusState.preview}
+          preprocessedSrc={focusState.preprocessedPreview}
           focusSrc={focusState.focusPreview}
         />
 

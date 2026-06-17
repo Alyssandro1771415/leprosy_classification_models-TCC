@@ -39,6 +39,7 @@ export default function AnalysisDetailDialog({
   onClose,
 }: AnalysisDetailDialogProps) {
   const [focusPreview, setFocusPreview] = useState<string | null>(null)
+  const [preprocessedPreview, setPreprocessedPreview] = useState<string | null>(null)
   const [loadingFocus, setLoadingFocus] = useState(false)
   const [focusError, setFocusError] = useState<string | null>(null)
 
@@ -49,6 +50,7 @@ export default function AnalysisDetailDialog({
   useEffect(() => {
     if (!open || !item?.imageBase64) {
       setFocusPreview(null)
+      setPreprocessedPreview(null)
       setFocusError(null)
       setLoadingFocus(false)
       return
@@ -61,6 +63,7 @@ export default function AnalysisDetailDialog({
         setLoadingFocus(true)
         setFocusError(null)
         setFocusPreview(null)
+        setPreprocessedPreview(null)
 
         const file = base64ToFile(item!.imageBase64!, `analysis-${item!.id ?? "detail"}.png`)
         const response = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_focus`, {
@@ -76,10 +79,15 @@ export default function AnalysisDetailDialog({
         }
 
         const data = await response.json()
-        const preview = `data:${data.mime_type ?? "image/png"};base64,${data.focus_base64}`
+        const mimeType = data.mime_type ?? "image/png"
+        const preview = `data:${mimeType};base64,${data.focus_base64}`
+        const preprocessed = data.preprocessed_base64
+          ? `data:${mimeType};base64,${data.preprocessed_base64}`
+          : null
 
         if (!cancelled) {
           setFocusPreview(preview)
+          setPreprocessedPreview(preprocessed)
         }
       } catch (error) {
         if (!cancelled) {
@@ -155,8 +163,8 @@ export default function AnalysisDetailDialog({
                       Visualização para o profissional de saúde
                     </Heading>
                     <Text color="gray.500" fontSize="sm" mb={4}>
-                      O mapa de calor destaca as regiões da imagem que mais influenciaram a
-                      decisão do modelo de inteligência artificial.
+                      Visualização em três etapas: imagem original, resultado do pré-processamento
+                      (canal Y + filtro bilateral) e mapa de calor Grad-CAM sobre a entrada do modelo.
                     </Text>
 
                     {loadingFocus && !focusPreview ? (
@@ -169,6 +177,7 @@ export default function AnalysisDetailDialog({
                     ) : (
                       <AnalysisImagePair
                         originalSrc={originalSrc}
+                        preprocessedSrc={preprocessedPreview}
                         focusSrc={focusPreview}
                         loadingFocus={loadingFocus}
                       />

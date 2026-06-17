@@ -1,10 +1,7 @@
-from PIL import Image
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.resnet50 import preprocess_input
 import numpy as np
-import io
 
 from src.services.load_model import PreLoaderModel
+from src.services.preprocessing_service import prepare_model_input_dict
 
 
 class PredictImageClass:
@@ -36,18 +33,9 @@ class PredictImageClass:
         }
 
     def prepare_image_vector(self, image: bytes):
-       original_image = Image.open(io.BytesIO(image))
-       original_image = original_image.convert("RGB")
-       original_image = original_image.resize((224, 224))
-
-       img_array = np.array(original_image)
-       img_array = np.expand_dims(img_array, axis=0)
-
-       img_array = preprocess_input(img_array)
-
-       return img_array
+        return prepare_model_input_dict(image)
 
     def predict_class(self, img_vec):
-        prediction = self.model.predict(img_vec)
+        prediction = self.model.predict(img_vec, verbose=0)
 
         return float(prediction[0][0])
