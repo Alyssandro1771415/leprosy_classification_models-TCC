@@ -20,12 +20,26 @@ class PredictImageClass:
         model_pre_loader = PreLoaderModel()
         self.model = model_pre_loader.model_loader()
 
+    def predict_class(self, img_vec):
+        prediction = self.model.predict(img_vec, verbose=0)
+        probs = np.asarray(prediction[0]).ravel()
+
+        if len(probs) == 2:
+            predicted_idx = int(np.argmax(probs))
+            predicted_class = "leprosy" if predicted_idx == 0 else "outro"
+            probability = float(probs[predicted_idx])
+        else:
+            probability = float(probs[0])
+            predicted_class = "outro" if probability <= 0.5 else "leprosy"
+            if predicted_class == "outro":
+                probability = 1.0 - probability
+
+        return predicted_class, probability
+
     def get_result_prediction(self, image: bytes) -> dict:
 
         img_vec = self.prepare_image_vector(image)
-        probability = self.predict_class(img_vec)
-
-        predicted_class = "outro" if probability <= 0.5 else "leprosy"
+        predicted_class, probability = self.predict_class(img_vec)
 
         return {
             "predicted_class": predicted_class,
@@ -34,8 +48,3 @@ class PredictImageClass:
 
     def prepare_image_vector(self, image: bytes):
         return prepare_model_input_dict(image)
-
-    def predict_class(self, img_vec):
-        prediction = self.model.predict(img_vec, verbose=0)
-
-        return float(prediction[0][0])

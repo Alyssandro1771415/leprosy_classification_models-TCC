@@ -8,13 +8,14 @@ from src.controllers.prediction_controller import PredictionController
 async def save_prediction(request: Request):
 
     try:
-        body = json.loads(request.body)
+        body_data = request.body.decode("utf-8") if isinstance(request.body, bytes) else request.body
+        body = json.loads(body_data)
 
         user_id = body.get("user_id")
         image_base64 = body.get("image_base64")
         prediction = body.get("prediction")
         confidence = body.get("confidence")
-        model_version = body.get("modelVersion")
+        model_version = body.get("model_version") or body.get("modelVersion")
         allow_for_training = body.get("allow_for_training")
 
         if not user_id or not image_base64:

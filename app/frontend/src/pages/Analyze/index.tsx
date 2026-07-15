@@ -17,6 +17,7 @@ import AnalysisDetailDialog from "../../components/AnalysisDetailDialog"
 import { useAuth } from "../../contexts/AuthContext"
 import type { HistoryItem } from "../../types/analysis"
 import { MODEL_VERSION } from "../../types/analysis"
+import { getApiBaseUrl } from "../../config/api"
 import { base64ToDataUrl, buildImageFormData } from "../../utils/imageUtils"
 
 export default function Analyze() {
@@ -42,9 +43,8 @@ export default function Analyze() {
 
     try {
       setLoadingHistory(true)
-      console.log(`${import.meta.env.VITE_API_LINK}/predictions/history/${user.uid}`)
       const response = await fetch(
-        `${import.meta.env.VITE_API_LINK}/predictions/history/${user.uid}`, {
+        `${getApiBaseUrl()}/predictions/history/${user.uid}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -79,7 +79,7 @@ export default function Analyze() {
     try {
       setLoading(true)
 
-      const predRes = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_data`, {
+      const predRes = await fetch(`${getApiBaseUrl()}/prediction_data`, {
         method: "POST",
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
@@ -89,7 +89,7 @@ export default function Analyze() {
       const predData = await predRes.json()
       const isHanseniase = predData.predicted_class !== "outro"
 
-      const convRes = await fetch(`${import.meta.env.VITE_API_LINK}/image/convert`, {
+      const convRes = await fetch(`${getApiBaseUrl()}/image/convert`, {
         method: "POST",
         headers: {
           "x-access-token": import.meta.env.VITE_SECRET_TOKEN
@@ -98,7 +98,7 @@ export default function Analyze() {
       })
       const convData = await convRes.json()
 
-      const saveRes = await fetch(`${import.meta.env.VITE_API_LINK}/predictions/save`, {
+      const saveRes = await fetch(`${getApiBaseUrl()}/predictions/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +123,7 @@ export default function Analyze() {
         setResult(nextResult)
         fetchHistory()
 
-        const focusRes = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_focus`, {
+        const focusRes = await fetch(`${getApiBaseUrl()}/prediction_focus`, {
           method: "POST",
           headers: {
             "x-access-token": import.meta.env.VITE_SECRET_TOKEN

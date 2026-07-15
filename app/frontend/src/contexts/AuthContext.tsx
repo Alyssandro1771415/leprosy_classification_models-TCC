@@ -1,3 +1,5 @@
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication"
+import { Capacitor } from "@capacitor/core"
 import {
   createContext,
   useContext,
@@ -5,9 +7,11 @@ import {
   useState,
 } from "react"
 import {
+  GoogleAuthProvider,
   type User,
-  type UserCredential, // 1. Adicione esta importação de tipo
+  type UserCredential,
   onAuthStateChanged,
+  signInWithCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
@@ -19,7 +23,6 @@ type AuthContextType = {
   user: User | null
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string) => Promise<void>
-  // 2. Mude de Promise<void> para Promise<UserCredential>
   loginWithGoogle: () => Promise<UserCredential>
   logout: () => Promise<void>
 }
@@ -48,10 +51,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function loginWithGoogle(): Promise<UserCredential> {
-    return await signInWithPopup(auth, googleProvider);
+    if (Capacitor.isNativePlatform()) {
+      const result = await FirebaseAuthentication.signInWithGoogle()
+      const idToken = result.credential?.idToken
+
+      if (!idToken) {
+        throw new Error("Token do Google não recebido")
+      }
+
+      const credential = GoogleAuthProvider.credential(idToken)
+      return signInWithCredential(auth, credential)
+    }
+
+    return signInWithPopup(auth, googleProvider)
   }
 
   async function logout() {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await FirebaseAuthentication.signOut()
+      } catch {
+        // Ignora se já estiver deslogado na camada nativa
+      }
+    }
+
     await signOut(auth)
   }
 

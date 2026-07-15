@@ -27,3 +27,6 @@ class PredictionController:
     def get_user_predictions(self, user_id: str):
         result = self.prediction_service.get_user_predictions(user_id)
         return result
+
+    def delete_prediction(self, user_id: str, prediction_id: str):
+        return self.prediction_service.delete_prediction(user_id, prediction_id)

@@ -1,5 +1,6 @@
 from src.services.firebase_service import FirebaseService
-from datetime import datetime
+from src.services.image_service import ImageService
+from datetime import datetime, timezone
 import uuid
 
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -17,7 +18,7 @@ class PredictionService:
         prediction: str,
         confidence: float,
         model_version: str,
-        allow_for_training: str
+        allow_for_training: bool,
     ):
         db = FirebaseService.get_db()
 
@@ -26,12 +27,21 @@ class PredictionService:
         user_doc = user_ref.get()
 
         if not user_doc.exists:
-            raise Exception("Usuário não encontrado")
+            now = datetime.now(timezone.utc)
+            user_ref.set({
+                "email": "",
+                "AllowImageUsage": False,
+                "createdAt": now,
+                "updatedAt": now,
+            })
 
         prediction_id = str(uuid.uuid4())
 
+        image_service = ImageService()
+        stored_image_base64 = image_service.compress_base64_for_storage(image_base64)
+
         prediction_data = {
-            "imageBase64": image_base64,
+            "imageBase64": stored_image_base64,
             "prediction": prediction,
             "confidence": confidence,
             "createdAt": datetime.now(),
@@ -69,3 +79,17 @@ class PredictionService:
             except Exception as e:
                 print(f"Erro real no Service: {e}")
                 raise e
+
+    def delete_prediction(self, user_id: str, prediction_id: str):
+        user_ref = self.db.collection("users").document(user_id)
+        prediction_ref = user_ref.collection("predictions").document(prediction_id)
+
+        if not prediction_ref.get().exists:
+            raise Exception("Análise não encontrada")
+
+        prediction_ref.delete()
+
+        return {
+            "deleted": True,
+            "predictionId": prediction_id,
+        }

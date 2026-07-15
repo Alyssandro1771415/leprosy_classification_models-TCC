@@ -12,7 +12,7 @@ export default function LogoutButton() {
   async function handleLogout() {
     try {
       await logout()
-      navigate("/", { replace: true })
+      navigate("/login", { replace: true })
     } catch {
       alert("Erro ao sair")
     }

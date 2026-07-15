@@ -7,6 +7,7 @@ from .user_consent_routes import set_user_consent
 from .save_prediction_routes import save_prediction
 from .convert_base64_image import handle_image_upload
 from .prediction_history_routes import get_prediction_history
+from .delete_prediction_routes import delete_prediction
 
 
 def register_routes(server):
@@ -34,6 +35,10 @@ def register_routes(server):
     @server.get("/predictions/history/:user_id")
     async def _(request: Request):
         return await get_prediction_history(request)
+
+    @server.delete("/predictions/:user_id/:prediction_id")
+    async def _(request: Request):
+        return await delete_prediction(request)
 
     @server.get("/")
     async def main(request: Request):

@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react"
 import AnalysisImagePair from "./AnalysisImagePair"
 import type { HistoryItem } from "../types/analysis"
+import { getApiBaseUrl } from "../config/api"
 import { base64ToDataUrl, base64ToFile, buildImageFormData } from "../utils/imageUtils"
 
 type AnalysisDetailDialogProps = {
@@ -66,7 +67,7 @@ export default function AnalysisDetailDialog({
         setPreprocessedPreview(null)
 
         const file = base64ToFile(item!.imageBase64!, `analysis-${item!.id ?? "detail"}.png`)
-        const response = await fetch(`${import.meta.env.VITE_API_LINK}/prediction_focus`, {
+        const response = await fetch(`${getApiBaseUrl()}/prediction_focus`, {
           method: "POST",
           headers: {
             "x-access-token": import.meta.env.VITE_SECRET_TOKEN,

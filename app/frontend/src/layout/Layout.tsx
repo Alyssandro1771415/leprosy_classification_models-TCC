@@ -1,17 +1,17 @@
-import { Flex, Box } from "@chakra-ui/react"
+import { Box } from "@chakra-ui/react"
 import { Outlet } from "react-router-dom"
-import BottomNav from "../components/BottomNav"
-import LogoutButton from "../components/LogOutButton"
+
+import DrawerMenu from "../components/DrawerMenu"
+import { COLORS } from "../constants/colors"
+import { DrawerProvider } from "../contexts/DrawerContext"
 
 export default function Layout() {
   return (
-    <Flex direction="column" minH="100vh">
-      <Box flex="1" pb="70px">
-        <LogoutButton />
+    <DrawerProvider>
+      <Box minH="100dvh" bg={COLORS.pageBg}>
         <Outlet />
       </Box>
-
-      <BottomNav />
-    </Flex>
+      <DrawerMenu />
+    </DrawerProvider>
   )
 }
