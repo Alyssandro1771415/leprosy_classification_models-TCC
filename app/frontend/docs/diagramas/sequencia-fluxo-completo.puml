@@ -1,0 +1,61 @@
+@startuml sequencia-fluxo-completo
+!theme plain
+skinparam shadowing false
+title Sequência — fluxo completo (login → análise → salvar)
+
+actor "Profissional\nde saúde" as P
+participant "Frontend\n(React)" as F
+participant "Firebase Auth" as FA
+participant "Backend\n(Robyn)" as B
+database "Firestore" as DB
+
+== Autenticação ==
+P -> F : Abre o app (Splash → Login)
+P -> F : Informa e-mail e senha\nou Google
+alt E-mail / senha
+  F -> FA : signInWithEmailAndPassword()
+  FA --> F : User
+else Google
+  F -> FA : loginWithGoogle()\n(popup ou Capacitor nativo)
+  FA --> F : User
+  F -> B : POST /users/consent/\n{ user_id, email, name, allow: true }
+  B -> DB : sync users/{userId}
+  B --> F : HTTP 200
+end
+F --> P : Navega para /home
+
+== Histórico ==
+F -> B : GET /predictions/history/{uid}\n(header x-access-token)
+B -> DB : list users/{uid}/predictions
+B --> F : { total, predictions[] }
+F --> P : Exibe Histórico de Análise
+
+== Nova análise ==
+P -> F : NOVA ANÁLISE → /analyze/new
+P -> F : Câmera ou galeria
+F --> P : /analyze/consent (preview + consentimento)
+P -> F : Escolhe Sim/Não (uso para treino)\ne toca "Realizar Diagnóstico"
+
+par Inferência
+  F -> B : POST /prediction_data (multipart image)
+  B --> F : { predicted_class, probability }
+else Grad-CAM
+  F -> B : POST /prediction_focus (multipart image)
+  B --> F : { focus_base64, preprocessed_base64? }
+else Base64
+  F -> B : POST /image/convert (multipart image)
+  B --> F : { base64 }
+end
+
+F --> P : /analyze/result\n(carousel + predição + confiança)
+
+== Persistência ==
+P -> F : Salvar Análise
+F -> B : POST /users/consent/ (ensureUserSynced)
+B -> DB : upsert users/{uid}
+F -> B : POST /predictions/save\n{ user_id, image_base64, prediction,\n  confidence, model_version, allow_for_training }
+B -> DB : create users/{uid}/predictions/{id}
+B --> F : { predictionId }
+F --> P : Volta para /home (histórico atualizado)
+
+@enduml

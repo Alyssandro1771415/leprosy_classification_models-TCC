@@ -1,0 +1,64 @@
+@startuml sequencia-autenticacao
+!theme plain
+skinparam shadowing false
+title Sequência — autenticação e sessão (Firebase Auth)
+
+actor "Profissional\nde saúde" as P
+participant "Login /\nRegister" as UI
+participant "AuthContext" as Auth
+participant "Firebase Auth" as FA
+participant "Backend\n(Robyn)" as B
+database "Firestore" as DB
+
+== Inicialização ==
+Auth -> FA : onAuthStateChanged()
+alt sessão existente
+  FA --> Auth : User
+  Auth --> UI : user autenticado → /home
+else sem sessão
+  FA --> Auth : null
+  Auth --> UI : exibe Splash → Login
+end
+
+== Login e-mail ==
+P -> UI : e-mail + senha
+opt Manter-me conectado (web)
+  UI -> FA : setPersistence(\nbrowserLocal | browserSession)
+end
+UI -> Auth : login(email, password)
+Auth -> FA : signInWithEmailAndPassword()
+FA --> Auth : User
+Auth --> UI : navigate(/home)
+
+== Login Google ==
+P -> UI : Continuar com Google
+UI -> Auth : loginWithGoogle()
+alt Capacitor nativo
+  Auth -> FA : Capacitor signInWithGoogle\n+ signInWithCredential
+else Web
+  Auth -> FA : signInWithPopup(googleProvider)
+end
+FA --> Auth : User
+UI -> B : POST /users/consent/\n(sync perfil)
+B -> DB : upsert users/{uid}
+UI --> P : /home
+
+== Registro ==
+P -> UI : Criar conta (e-mail/senha)
+UI -> Auth : register(email, password)
+Auth -> FA : createUserWithEmailAndPassword()
+FA --> Auth : User
+UI --> P : /home
+note right of UI
+  Sync Firestore do registro e-mail
+  ocorre depois, em saveAnalysis
+  (ensureUserSynced).
+end note
+
+== Logout ==
+P -> UI : Drawer → Sair
+UI -> Auth : logout()
+Auth -> FA : signOut()
+Auth --> UI : navigate(/login)
+
+@enduml

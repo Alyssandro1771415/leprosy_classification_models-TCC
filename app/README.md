@@ -34,6 +34,8 @@ Para abrir no Android Studio: `npm run cap:open`.
 
 Instruções detalhadas em [`frontend/build.txt`](frontend/build.txt).
 
+Documentação UML (casos de uso, classes, sequências e persistência): [`frontend/docs/`](frontend/docs/).
+
 ## Backend
 
 ```bash

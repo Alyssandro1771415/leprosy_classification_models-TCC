@@ -1,0 +1,89 @@
+@startuml casos-de-uso
+!theme plain
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+}
+title Diagrama de casos de uso — Frontend (Leprosy Identifier)
+
+left to right direction
+
+actor "Profissional\nde saúde" as Profissional #LightBlue
+actor "Firebase Auth" as FirebaseAuth <<External System>> #EEEEEE
+actor "Backend API\n(Robyn)" as Backend <<External System>> #E8F5E9
+actor "Firestore\n(via API)" as Firestore <<External System>> #FFF3E0
+
+rectangle "Frontend (React + Capacitor)" as App #FFFDE7 {
+  usecase "UC01\nVisualizar splash\ne redirecionar" as UC01
+  usecase "UC02\nAutenticar com\ne-mail e senha" as UC02
+  usecase "UC03\nAutenticar com Google" as UC03
+  usecase "UC04\nRegistrar conta" as UC04
+  usecase "UC05\nListar histórico\nde análises" as UC05
+  usecase "UC06\nCapturar ou selecionar\nimagem" as UC06
+  usecase "UC07\nInformar consentimento\nde uso da imagem" as UC07
+  usecase "UC08\nRealizar diagnóstico\n(predição + Grad-CAM)" as UC08
+  usecase "UC09\nVisualizar resultado\nda análise" as UC09
+  usecase "UC10\nSalvar análise" as UC10
+  usecase "UC11\nVisualizar detalhe\nda análise" as UC11
+  usecase "UC12\nExcluir análise" as UC12
+  usecase "UC13\nConsultar meus dados" as UC13
+  usecase "UC14\nConsultar sobre\no projeto" as UC14
+  usecase "UC15\nEncerrar sessão" as UC15
+}
+
+Profissional --> UC01
+Profissional --> UC02
+Profissional --> UC03
+Profissional --> UC04
+Profissional --> UC05
+Profissional --> UC06
+Profissional --> UC07
+Profissional --> UC08
+Profissional --> UC09
+Profissional --> UC10
+Profissional --> UC11
+Profissional --> UC12
+Profissional --> UC13
+Profissional --> UC14
+Profissional --> UC15
+
+UC02 ..> FirebaseAuth : <<include>>\nsignInWithEmailAndPassword
+UC03 ..> FirebaseAuth : <<include>>\nGoogle (popup / nativo)
+UC03 ..> Backend : <<include>>\nPOST /users/consent/
+UC04 ..> FirebaseAuth : <<include>>\ncreateUserWithEmailAndPassword
+UC05 ..> Backend : <<include>>\nGET /predictions/history/:userId
+UC05 ..> Firestore : <<include>>\nvia backend
+UC07 ..> UC06 : <<include>>\nrequer imagem
+UC08 ..> UC07 : <<include>>\nrequer consentimento
+UC08 ..> Backend : <<include>>\nPOST /prediction_data\nPOST /prediction_focus\nPOST /image/convert
+UC09 ..> UC08 : <<include>>\nrequer ResultFlowState
+UC10 ..> UC09 : <<include>>\nrequer resultado
+UC10 ..> Backend : <<include>>\nPOST /users/consent/\nPOST /predictions/save
+UC10 ..> Firestore : <<include>>\nvia backend
+UC11 ..> UC05 : <<extend>>\na partir do histórico
+UC11 ..> Backend : <<include>>\nPOST /prediction_focus\n(regera Grad-CAM)
+UC12 ..> Backend : <<include>>\nDELETE /predictions/:userId/:id
+UC12 ..> Firestore : <<include>>\nvia backend
+UC15 ..> FirebaseAuth : <<include>>\nsignOut
+
+note right of UC08
+  Promise.all no consentimento:
+  predição, mapas Grad-CAM
+  e conversão base64.
+  Modelo: v2.0-y-bilateral
+end note
+
+note bottom of UC10
+  ensureUserSynced cria/atualiza
+  o documento do usuário no Firestore
+  antes de persistir a predição.
+end note
+
+note bottom of UC05
+  Rotas privadas exigem usuário
+  autenticado (PrivateRoute).
+end note
+
+@enduml

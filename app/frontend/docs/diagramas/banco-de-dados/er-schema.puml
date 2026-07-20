@@ -1,0 +1,57 @@
+@startuml er-schema
+!theme plain
+skinparam shadowing false
+skinparam linetype ortho
+title Diagrama entidade-relacionamento — Firestore (via Backend)
+
+skinparam entity {
+  BackgroundColor #FCE4EC
+  BorderColor #AD1457
+}
+
+entity "Firebase Auth\n(Identity)" as auth {
+  * **uid** : string <<PK>>
+  --
+  email : string
+  displayName : string
+  provider : password | google.com
+}
+
+entity "users\n(collection)" as users {
+  * **documentId** : uid <<PK>>
+  --
+  * **email** : string
+  name : string
+  * **AllowImageUsage** : bool
+  createdAt : timestamp
+  updatedAt : timestamp
+}
+
+entity "predictions\n(subcollection)" as predictions {
+  * **documentId** : predictionId <<PK>>
+  --
+  * **imageBase64** : string
+  * **prediction** : string
+  * **confidence** : float
+  * **createdAt** : datetime
+  * **modelVersion** : string
+  * **allowForTraining** : bool
+}
+
+auth ||--|| users : "uid = documentId\n1:1 (sync via API)"
+users ||--o{ predictions : "users/{uid}/predictions\n1:N"
+
+note right of auth
+  O frontend só usa Firebase Auth
+  diretamente (AuthContext).
+  Não há SDK Firestore no app.
+end note
+
+note bottom of predictions
+  Campos gravados por
+  POST /predictions/save
+  (PredictionService no backend).
+  modelVersion atual: v2.0-y-bilateral
+end note
+
+@enduml

@@ -1,0 +1,41 @@
+@startuml sequencia-historico
+!theme plain
+skinparam shadowing false
+title Sequência — histórico, detalhe e exclusão
+
+actor "Profissional\nde saúde" as P
+participant "Home" as H
+participant "AnalysisOverview" as AO
+participant "useAnalysisHistory\n/ analysisService" as S
+participant "Backend\n(Robyn)" as B
+database "Firestore" as DB
+
+== Listagem ==
+H -> S : useAnalysisHistory()
+S -> B : GET /predictions/history/{uid}
+B -> DB : users/{uid}/predictions
+B --> S : predictions[]
+S --> H : history
+H --> P : Lista HistoryListItem
+
+== Detalhe ==
+P -> H : Toca um item
+H -> AO : navigate(/analysis/:id,\nstate: { item })
+AO -> S : fetchFocusMaps(imageBase64 → File)
+S -> B : POST /prediction_focus
+B --> S : focus_base64, preprocessed_base64?
+AO --> P : Carousel + AnalysisInfoCards
+
+== Exclusão (lista ou detalhe) ==
+P -> H : Menu ⋮ Excluir\nou lixeira no detalhe
+H -> S : deleteAnalysis(uid, predictionId)
+S -> B : DELETE /predictions/{uid}/{id}
+B -> DB : delete document
+B --> S : { deleted: true }
+alt Na Home
+  S --> H : refetch()
+else No detalhe
+  AO -> H : navigate(/home)
+end
+
+@enduml

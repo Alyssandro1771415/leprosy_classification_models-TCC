@@ -5,7 +5,8 @@ description = "Modelos de deep learning para classificação de imagens dermatol
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "tensorflow[and-cuda]>=2.16,<2.23",
+    # GTX 1650 = sm_75. TF 2.16+ wheels oficiais removem sm_75 → CUDA_ERROR_LAUNCH_FAILED
+    "tensorflow[and-cuda]==2.15.1",
     "numpy>=1.21",
     "opencv-python>=4.5",
     "pillow>=8.3",

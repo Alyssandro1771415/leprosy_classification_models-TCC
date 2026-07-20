@@ -1,0 +1,36 @@
+@startuml sequencia-persistencia-salvar
+!theme plain
+skinparam shadowing false
+title Sequência — persistência ao salvar análise
+
+actor "Profissional\nde saúde" as P
+participant "AnalyzeResult" as AR
+participant "analysisService" as S
+participant "Backend\n(Robyn)" as B
+participant "UserService /\nPredictionService" as PS
+database "Firestore" as DB
+
+P -> AR : Salvar Análise
+AR -> S : saveAnalysis({\n  user, imageBase64, prediction,\n  confidence, allowForTraining\n})
+
+S -> S : ensureUserSynced(user)
+S -> B : POST /users/consent/\n{ user_id, email, name, allow: true }
+B -> PS : sync_user_data()
+alt usuário inexistente
+  PS -> DB : set users/{uid}\n(+ createdAt)
+else existente
+  PS -> DB : update users/{uid}\n(email, name, AllowImageUsage, updatedAt)
+end
+B --> S : HTTP 200
+
+S -> B : POST /predictions/save\n{ user_id, image_base64, prediction,\n  confidence, model_version,\n  allow_for_training }
+B -> PS : save_prediction()
+opt user doc ausente
+  PS -> DB : stub users/{uid}
+end
+PS -> DB : create users/{uid}/predictions/{id}
+B --> S : { predictionId, allowForTraining }
+S --> AR : sucesso
+AR -> P : navigate(/home)
+
+@enduml

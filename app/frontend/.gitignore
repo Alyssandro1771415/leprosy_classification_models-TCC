@@ -27,3 +27,6 @@ dist-ssr
 # Variáveis de ambiente
 .env
 api.js
+
+# PlantUML (baixado por docs/diagramas/render.sh)
+docs/diagramas/plantuml.jar

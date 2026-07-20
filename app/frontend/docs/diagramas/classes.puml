@@ -1,0 +1,197 @@
+@startuml classes
+!theme plain
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+title Diagrama de classes — Frontend (Leprosy Identifier)
+
+package "Bootstrap" #E8F4FC {
+  class main_tsx <<entry>> {
+    ChakraProvider
+    AuthProvider
+    App
+  }
+  class App {
+    BrowserRouter
+    Routes / Route
+  }
+  class PrivateRoute {
+    +useAuth()
+    --
+    redireciona para /login se user == null
+  }
+  class Layout {
+    DrawerProvider
+    Outlet
+    DrawerMenu
+  }
+}
+
+package "contexts" #FFF8E1 {
+  class AuthContext {
+    user: User | null
+    loading: boolean
+    --
+    +login(email, password)
+    +register(email, password)
+    +loginWithGoogle()
+    +logout()
+    +useAuth()
+  }
+  class DrawerContext {
+    isOpen: boolean
+    --
+    +openDrawer()
+    +closeDrawer()
+    +useDrawer()
+  }
+}
+
+package "pages <<Telas>>" #E3F2FD {
+  class Splash
+  class Login {
+    +handleEmailLogin()
+    +handleGoogleLogin()
+  }
+  class Register
+  class Home {
+    useAnalysisHistory()
+    deleteAnalysis()
+  }
+  class NewAnalysis {
+    camera | gallery → navigate consent
+  }
+  class AnalyzeConsent {
+    runPrediction()
+    fetchFocusMaps()
+    convertImageToBase64()
+  }
+  class AnalyzeResult {
+    saveAnalysis()
+    ImageCarousel
+  }
+  class AnalysisOverview {
+    fetchFocusMaps()
+    deleteAnalysis()
+  }
+  class About
+  class MyData
+}
+
+package "components <<UI>>" #E8F5E9 {
+  class DrawerMenu {
+    Meus dados / Sobre / Sair
+  }
+  class PageHeader
+  class DashedActionButton
+  class PrimaryActionButton
+  class OutlineActionButton
+  class HistoryListItem
+  class ImageCarousel
+  class AnalysisResultCard
+  class AnalysisInfoCards
+}
+
+package "services / hooks" #F3E5F5 {
+  class analysisService {
+    +runPrediction(file)
+    +fetchFocusMaps(file)
+    +convertImageToBase64(file)
+    +ensureUserSynced(user)
+    +saveAnalysis(payload)
+    +deleteAnalysis(userId, id)
+  }
+  class useAnalysisHistory {
+    history / loading / error
+    +refetch()
+  }
+  class firebase_ts {
+    auth
+    googleProvider
+  }
+  class api_config {
+    +getApiBaseUrl()
+    +fetchWithTimeout()
+  }
+}
+
+package "types / utils" #FFFDE7 {
+  class HistoryItem {
+    id
+    imageBase64
+    prediction
+    confidence
+    createdAt
+    modelVersion
+    allowForTraining
+  }
+  class ConsentFlowState {
+    file: File
+    preview: string
+  }
+  class ResultFlowState {
+    allowForTraining
+    result
+    focusPreview
+    preprocessedPreview?
+    imageBase64
+  }
+  class imageUtils {
+    +cleanBase64()
+    +base64ToDataUrl()
+    +base64ToFile()
+    +buildImageFormData()
+  }
+}
+
+main_tsx --> App
+App --> PrivateRoute
+PrivateRoute --> Layout
+Layout --> DrawerContext
+Layout --> DrawerMenu
+App --> AuthContext
+AuthContext --> firebase_ts
+
+Splash -[hidden]-> Login
+Login --> AuthContext
+Register --> AuthContext
+Home --> useAnalysisHistory
+Home --> analysisService
+Home --> HistoryListItem
+NewAnalysis --> ConsentFlowState
+AnalyzeConsent --> analysisService
+AnalyzeConsent --> ResultFlowState
+AnalyzeResult --> analysisService
+AnalyzeResult --> ImageCarousel
+AnalyzeResult --> AnalysisResultCard
+AnalysisOverview --> analysisService
+AnalysisOverview --> AnalysisInfoCards
+AnalysisOverview --> ImageCarousel
+MyData --> AuthContext
+DrawerMenu --> AuthContext
+DrawerMenu --> DrawerContext
+
+analysisService --> api_config
+useAnalysisHistory --> api_config
+HistoryItem <.. useAnalysisHistory
+ConsentFlowState <.. NewAnalysis
+ResultFlowState <.. AnalyzeConsent
+
+note right of analysisService
+  Endpoints Robyn:
+  POST /prediction_data
+  POST /prediction_focus
+  POST /image/convert
+  POST /users/consent/
+  POST /predictions/save
+  DELETE /predictions/:uid/:id
+  Header: x-access-token
+end note
+
+note bottom of App
+  Rotas: / → Splash
+  /login, /register
+  privadas: /home, /analyze/*,
+  /analysis/:id, /about, /my-data
+end note
+
+@enduml

@@ -1,0 +1,37 @@
+@startuml infraestrutura-firebase
+!theme plain
+skinparam shadowing false
+title Infraestrutura de persistência — Frontend × Firebase × Backend
+
+rectangle "Dispositivo (Capacitor / Web)" as Device #FFFDE7 {
+  component "React App\n(AuthContext +\nanalysisService)" as App
+}
+
+cloud "Firebase" as FB #E3F2FD {
+  component "Firebase Auth" as FA
+  database "Cloud Firestore" as FS
+}
+
+rectangle "Servidor" as Server #E8F5E9 {
+  component "API Robyn\n+ Firebase Admin SDK" as API
+  component "Modelo TensorFlow\nv2.0-y-bilateral" as Model
+}
+
+App --> FA : login / register / logout\n(SDK client)
+App --> API : REST\n(header x-access-token)
+API --> FA : valida identidade\n(quando aplicável via uid do body)
+API --> FS : CRUD users +\npredictions
+API --> Model : inferência /\nGrad-CAM
+
+note bottom of App
+  O frontend NÃO acessa Firestore
+  diretamente. Toda leitura/escrita
+  de análises passa pela API.
+end note
+
+note right of FA
+  Web: getAuth / signInWithPopup
+  Native: initializeAuth +\nCapacitor Google Auth
+end note
+
+@enduml

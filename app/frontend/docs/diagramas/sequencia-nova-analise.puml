@@ -1,0 +1,53 @@
+@startuml sequencia-nova-analise
+!theme plain
+skinparam shadowing false
+title Sequência — nova análise (captura → consentimento → resultado)
+
+actor "Profissional\nde saúde" as P
+participant "NewAnalysis" as NA
+participant "AnalyzeConsent" as AC
+participant "AnalyzeResult" as AR
+participant "analysisService" as S
+participant "Backend\n(Robyn)" as B
+
+P -> NA : Abre /analyze/new
+P -> NA : Escolhe câmera ou galeria
+NA -> NA : Gera preview (URL.createObjectURL)
+NA -> AC : navigate(/analyze/consent,\nstate: ConsentFlowState { file, preview })
+
+alt state ausente
+  AC -> NA : redirect /analyze/new
+end
+
+AC --> P : Exibe imagem + rádios de consentimento
+P -> AC : allowForTraining (Sim | Não)\n+ "Realizar Diagnóstico"
+
+AC -> S : Promise.all([
+AC -> S :   runPrediction(file),
+AC -> S :   fetchFocusMaps(file),
+AC -> S :   convertImageToBase64(file)
+AC -> S : ])
+
+S -> B : POST /prediction_data
+B --> S : predicted_class, probability
+S -> S : Hanseníase se class != "outro"
+
+S -> B : POST /prediction_focus
+B --> S : focus_base64, preprocessed_base64?
+
+S -> B : POST /image/convert
+B --> S : base64
+
+S --> AC : PredictionResult + FocusResult + imageBase64
+AC -> AR : navigate(/analyze/result,\nstate: ResultFlowState)
+
+AR --> P : ImageCarousel:\nOriginal | Pré-processamento | Grad-CAM
+AR --> P : AnalysisResultCard\n(predição + confiança)
+
+note right of S
+  Modelo registrado no app:
+  MODEL_VERSION = "v2.0-y-bilateral"
+  Pré-processamento: canal Y + bilateral
+end note
+
+@enduml
