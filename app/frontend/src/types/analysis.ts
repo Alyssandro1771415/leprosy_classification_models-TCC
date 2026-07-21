@@ -9,14 +9,3 @@ export type HistoryItem = {
   modelVersion?: string | null
   allowForTraining?: boolean
 }
-
-export type AnalyzeResult = {
-  detected: boolean
-  probability: string
-}
-
-export type FocusResponse = {
-  focus_base64: string
-  preprocessed_base64?: string
-  mime_type?: string
-}
