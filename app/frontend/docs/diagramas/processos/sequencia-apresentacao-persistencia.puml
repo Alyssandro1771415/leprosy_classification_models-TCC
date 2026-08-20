@@ -1,0 +1,53 @@
+@startuml sequencia-apresentacao-persistencia
+!theme plain
+skinparam shadowing false
+title Sequência — Apresentação e persistência dos resultados (3.4)
+
+actor "Usuário\nfinal" as P
+participant "AnalyzeResult" as AR
+participant "Home" as H
+participant "AnalysisOverview" as AO
+participant "analysisService /\nuseAnalysisHistory" as S
+participant "Backend\n(Robyn)" as B
+database "Firestore" as DB
+
+== Apresentação ==
+AR --> P : ImageCarousel\n(Original | Pré-processamento | Grad-CAM)
+AR --> P : AnalysisResultCard\n(predição + confiança)
+
+== Persistência ==
+P -> AR : Salvar Análise
+AR -> S : saveAnalysis(...)
+S -> B : POST /users/consent/
+B -> DB : upsert users/{uid}
+S -> B : POST /predictions/save
+B -> DB : create predictions/{id}
+B --> S : predictionId
+S --> AR : sucesso
+AR -> H : navigate(/home)
+
+== Histórico e detalhe ==
+H -> S : useAnalysisHistory()
+S -> B : GET /predictions/history/{uid}
+B -> DB : list predictions
+B --> H : history[]
+H --> P : Lista de análises
+
+opt Abrir detalhe
+  P -> H : Seleciona item
+  H -> AO : /analysis/:id
+  AO -> S : fetchFocusMaps(imageBase64)
+  S -> B : POST /prediction_focus
+  B --> AO : Grad-CAM regenerado
+  AO --> P : Detalhe + info cards
+end
+
+opt Excluir
+  P -> H : Excluir (lista ou detalhe)
+  H -> S : deleteAnalysis(uid, id)
+  S -> B : DELETE /predictions/{uid}/{id}
+  B -> DB : delete document
+  B --> H : atualiza lista
+end
+
+@enduml

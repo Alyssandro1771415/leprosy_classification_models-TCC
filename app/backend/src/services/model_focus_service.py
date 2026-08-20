@@ -4,6 +4,7 @@ import io
 import cv2
 import numpy as np
 import tensorflow as tf
+import tf_keras as keras
 from PIL import Image
 
 from src.services.preprocessing_service import (
@@ -23,7 +24,7 @@ class ModelFocusService:
     def generate_focus_result(self, image_bytes: bytes) -> dict:
         original_image = open_rgb_image(image_bytes)
         y_channel = resize_y_channel(rgb_to_y_bilateral(original_image))
-        img_array = {"input_layer": np.expand_dims(y_channel, axis=(0, -1)).astype(np.float32)}
+        img_array = np.expand_dims(y_channel, axis=(0, -1)).astype(np.float32)
 
         heatmap = self._make_gradcam_heatmap(img_array)
         preprocessed_rgb = y_channel_to_display_rgb(y_channel)
@@ -43,7 +44,7 @@ class ModelFocusService:
         return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
     def _make_gradcam_heatmap(self, img_array, pred_index=None):
-        grad_model = tf.keras.models.Model(
+        grad_model = keras.models.Model(
             inputs=self.model.inputs,
             outputs=[
                 self.model.get_layer(self.last_conv_layer_name).output,
@@ -76,9 +77,10 @@ class ModelFocusService:
 
         heatmap = heatmap / max_value
 
-        return heatmap.numpy()
+        return np.asarray(heatmap.numpy(), dtype=np.float32)
 
     def _overlay_heatmap(self, image_array: np.ndarray, heatmap, alpha=0.5, gamma=2.0, percentile=80):
+        heatmap = np.asarray(heatmap, dtype=np.float32)
         heatmap_resized = cv2.resize(
             heatmap,
             (image_array.shape[1], image_array.shape[0]),

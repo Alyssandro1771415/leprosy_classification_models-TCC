@@ -10,7 +10,7 @@ title Diagrama de casos de uso — Frontend (Leprosy Identifier)
 
 left to right direction
 
-actor "Profissional\nde saúde" as Profissional #LightBlue
+actor "Usuário\nfinal" as UsuarioFinal #LightBlue
 actor "Firebase Auth" as FirebaseAuth <<External System>> #EEEEEE
 actor "Backend API\n(Robyn)" as Backend <<External System>> #E8F5E9
 actor "Firestore\n(via API)" as Firestore <<External System>> #FFF3E0
@@ -33,21 +33,21 @@ rectangle "Frontend (React + Capacitor)" as App #FFFDE7 {
   usecase "UC15\nEncerrar sessão" as UC15
 }
 
-Profissional --> UC01
-Profissional --> UC02
-Profissional --> UC03
-Profissional --> UC04
-Profissional --> UC05
-Profissional --> UC06
-Profissional --> UC07
-Profissional --> UC08
-Profissional --> UC09
-Profissional --> UC10
-Profissional --> UC11
-Profissional --> UC12
-Profissional --> UC13
-Profissional --> UC14
-Profissional --> UC15
+UsuarioFinal --> UC01
+UsuarioFinal --> UC02
+UsuarioFinal --> UC03
+UsuarioFinal --> UC04
+UsuarioFinal --> UC05
+UsuarioFinal --> UC06
+UsuarioFinal --> UC07
+UsuarioFinal --> UC08
+UsuarioFinal --> UC09
+UsuarioFinal --> UC10
+UsuarioFinal --> UC11
+UsuarioFinal --> UC12
+UsuarioFinal --> UC13
+UsuarioFinal --> UC14
+UsuarioFinal --> UC15
 
 UC02 ..> FirebaseAuth : <<include>>\nsignInWithEmailAndPassword
 UC03 ..> FirebaseAuth : <<include>>\nGoogle (popup / nativo)

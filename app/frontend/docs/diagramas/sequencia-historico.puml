@@ -3,7 +3,7 @@
 skinparam shadowing false
 title Sequência — histórico, detalhe e exclusão
 
-actor "Profissional\nde saúde" as P
+actor "Usuário\nfinal" as P
 participant "Home" as H
 participant "AnalysisOverview" as AO
 participant "useAnalysisHistory\n/ analysisService" as S

@@ -3,7 +3,7 @@
 skinparam shadowing false
 title Sequência — nova análise (captura → consentimento → resultado)
 
-actor "Profissional\nde saúde" as P
+actor "Usuário\nfinal" as P
 participant "NewAnalysis" as NA
 participant "AnalyzeConsent" as AC
 participant "AnalyzeResult" as AR

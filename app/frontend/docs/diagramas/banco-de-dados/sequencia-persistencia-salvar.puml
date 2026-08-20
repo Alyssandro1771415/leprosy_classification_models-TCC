@@ -3,7 +3,7 @@
 skinparam shadowing false
 title Sequência — persistência ao salvar análise
 
-actor "Profissional\nde saúde" as P
+actor "Usuário\nfinal" as P
 participant "AnalyzeResult" as AR
 participant "analysisService" as S
 participant "Backend\n(Robyn)" as B

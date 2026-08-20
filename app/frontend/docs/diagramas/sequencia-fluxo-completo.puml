@@ -3,7 +3,7 @@
 skinparam shadowing false
 title Sequência — fluxo completo (login → análise → salvar)
 
-actor "Profissional\nde saúde" as P
+actor "Usuário\nfinal" as P
 participant "Frontend\n(React)" as F
 participant "Firebase Auth" as FA
 participant "Backend\n(Robyn)" as B

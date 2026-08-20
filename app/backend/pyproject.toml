@@ -94,4 +94,5 @@ dependencies = [
     "gdown>=6.0.0",
     "opencv-python-headless>=4.10.0",
     "tensorflow-cpu>=2.20.0",
+    "tf-keras>=2.20.1",
 ]

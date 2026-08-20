@@ -1,0 +1,39 @@
+@startuml sequencia-processamento-ia
+!theme plain
+skinparam shadowing false
+title Sequência — Processamento assistido por IA (3.3)
+
+actor "Usuário\nfinal" as P
+participant "AnalyzeConsent" as AC
+participant "analysisService" as S
+participant "Backend\n(Robyn + TF)" as B
+participant "AnalyzeResult" as AR
+
+P -> AC : "Realizar Diagnóstico"
+
+AC -> S : Promise.all([...])
+
+par Predição
+  S -> B : POST /prediction_data
+  B -> B : Pré-processamento\nY + bilateral\n+ inferência
+  B --> S : predicted_class, probability
+  S -> S : Hanseníase se != "outro"
+else Grad-CAM
+  S -> B : POST /prediction_focus
+  B -> B : Gera mapa de calor\n(+ imagem pré-processada)
+  B --> S : focus_base64,\npreprocessed_base64?
+else Conversão
+  S -> B : POST /image/convert
+  B --> S : base64
+end
+
+S --> AC : PredictionResult +\nFocusResult + imageBase64
+AC -> AR : navigate(/analyze/result,\nstate: ResultFlowState)
+AR --> P : Resultado pronto para\napresentação (3.4)
+
+note right of B
+  Modelo em uso:
+  v2.0-y-bilateral
+end note
+
+@enduml

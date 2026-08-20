@@ -10,7 +10,7 @@ Casos de uso alinhados ao fluxo real do **frontend** (autenticação, nova anál
 
 | Ator | Papel |
 |------|--------|
-| **Profissional de saúde** | Usuário que autentica, envia imagens, consulta resultados e gerencia o histórico |
+| **Usuário final** | Usuário que autentica, envia imagens, consulta resultados e gerencia o histórico |
 | **Firebase Auth** | Identidade (e-mail/senha e Google); sessão consumida pelo `AuthContext` |
 | **Backend API (Robyn)** | Inferência, Grad-CAM, conversão de imagem, consentimento e CRUD de predições |
 | **Firestore (via API)** | Persistência de `users` e `predictions` — o app não acessa o Firestore diretamente |

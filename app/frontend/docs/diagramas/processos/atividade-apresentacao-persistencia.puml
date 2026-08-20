@@ -1,0 +1,36 @@
+@startuml atividade-apresentacao-persistencia
+!theme plain
+skinparam shadowing false
+skinparam ActivityBackgroundColor #FFF3E0
+skinparam ActivityBorderColor #EF6C00
+title Diagrama de atividade — Apresentação e persistência dos resultados (3.4)
+
+start
+:AnalyzeResult exibe carrossel\n(Original | Pré-processamento | Grad-CAM);
+:Exibe AnalysisResultCard\n(predição + confiança);
+
+if (Usuário salva a análise?) then (não)
+  :Pode permanecer na tela\nou voltar sem persistir;
+  stop
+else (sim)
+  :ensureUserSynced\nPOST /users/consent/;
+  :POST /predictions/save\n(predição, confiança, imagem,\n modelVersion, allowForTraining);
+  :Firestore grava\nusers/{uid}/predictions/{id};
+  :Navega para Home;
+endif
+
+:Home lista histórico\nGET /predictions/history/{uid};
+
+if (Ação no histórico?) then (Abrir detalhe)
+  :AnalysisOverview\n(/analysis/:id);
+  :Regenera Grad-CAM\nPOST /prediction_focus;
+  :Exibe carousel + info cards;
+elseif (Excluir) then
+  :DELETE /predictions/{uid}/{id};
+  :Atualiza lista (refetch);
+else (somente visualizar lista)
+endif
+
+stop
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml sequencia-captura-consentimento
+!theme plain
+skinparam shadowing false
+title Sequência — Captura e consentimento da imagem (3.2)
+
+actor "Usuário\nfinal" as P
+participant "Home" as H
+participant "NewAnalysis" as NA
+participant "AnalyzeConsent" as AC
+
+P -> H : Toca "NOVA ANÁLISE"
+H -> NA : navigate(/analyze/new)
+
+alt Câmera
+  P -> NA : Captura foto
+else Galeria
+  P -> NA : Seleciona imagem
+end
+
+NA -> NA : Valida File\ne gera preview
+NA -> AC : navigate(/analyze/consent,\nstate: { file, preview })
+
+alt state ausente
+  AC -> NA : redirect /analyze/new
+else state ok
+  AC --> P : Exibe preview
+  P -> AC : Escolhe allowForTraining\n(Sim | Não)
+  note over AC
+    Pronto para disparar
+    o processamento (3.3)
+  end note
+end
+
+@enduml

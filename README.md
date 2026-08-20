@@ -25,6 +25,14 @@ Compara 4 variantes de pré-processamento no canal Y e treina um modelo from-zer
 cd ml && bash scripts/run_ablation_pipeline.sh
 ```
 
+### Balanceamento da base
+
+`leprosy` vs. `outros` está em 1:2 nos três splits; as imagens removidas ficam em `ml/data/co2wounds_v2/backup/` com manifesto. Detalhes em [`ml/docs/dataset_balancing.md`](ml/docs/dataset_balancing.md).
+
+```bash
+cd ml && uv run python scripts/balance_outros_dataset.py --dry-run
+```
+
 ## Início rápido (App)
 
 Consulte [`app/README.md`](app/README.md).

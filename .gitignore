@@ -202,14 +202,16 @@ cython_debug/
 .cursorindexingignore
 
 # Legacy / removed paths
-APP/
-scripts/
-models/
-results_to_analyse/
-pipelines/
-utils/
-setup.py
-requirements.txt
+# Ancorados na raiz: sem a barra inicial, `scripts/` e `models/` casariam em
+# qualquer nível e deixariam `ml/scripts/` fora do versionamento.
+/APP/
+/scripts/
+/models/
+/results_to_analyse/
+/pipelines/
+/utils/
+/setup.py
+/requirements.txt
 cuda-keyring*.deb
 
 marimo/_static/
@@ -227,6 +229,10 @@ __marimo__/
 *.keras
 *.h5
 *.hdf5
+
+# Exportações SavedModel do backend — blobs acima do limite do GitHub.
+# A aplicação carrega o .keras; ver app/backend/src/services/load_model.py
+app/backend/src/model/*_savedmodel/
 
 # Específico do projeto - Modelos de Classificação de Hanseníase
 # ==============================================================
@@ -254,3 +260,7 @@ outputs/
 
 # JSON's de resultados
 ml/artifacts/
+
+# Material de apoio para a escrita do TCC (não versionado)
+documentacao_tcc/
+METODOLOGIA.docx

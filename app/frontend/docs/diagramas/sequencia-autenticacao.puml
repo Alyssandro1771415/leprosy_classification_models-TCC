@@ -3,7 +3,7 @@
 skinparam shadowing false
 title Sequência — autenticação e sessão (Firebase Auth)
 
-actor "Profissional\nde saúde" as P
+actor "Usuário\nfinal" as P
 participant "Login /\nRegister" as UI
 participant "AuthContext" as Auth
 participant "Firebase Auth" as FA

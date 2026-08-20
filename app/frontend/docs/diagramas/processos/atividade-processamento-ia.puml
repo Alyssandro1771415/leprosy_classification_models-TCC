@@ -1,0 +1,36 @@
+@startuml atividade-processamento-ia
+!theme plain
+skinparam shadowing false
+skinparam ActivityBackgroundColor #E8F5E9
+skinparam ActivityBorderColor #2E7D32
+title Diagrama de atividade — Processamento assistido por IA (3.3)
+
+start
+:Usuário confirma\n"Realizar Diagnóstico";
+
+fork
+  :POST /prediction_data\n(multipart image);
+  :Recebe predicted_class\ne probability;
+  :Mapeia classe\n(Hanseníase | Outro);
+fork again
+  :POST /prediction_focus\n(multipart image);
+  :Recebe focus_base64\ne preprocessed_base64?;
+fork again
+  :POST /image/convert\n(multipart image);
+  :Recebe imageBase64;
+end fork
+
+:Monta ResultFlowState\n{ allowForTraining, result,\n  focusPreview, preprocessedPreview?,\n  imageBase64, file, preview };
+
+:Navega para AnalyzeResult\n(/analyze/result);
+
+stop
+
+note right
+  Modelo: v2.0-y-bilateral
+  Pré-processamento:
+  canal Y + filtro bilateral
+  Chamadas em Promise.all
+end note
+
+@enduml

@@ -10,6 +10,9 @@ Diagramas UML em **imagem** (PNG) e fontes **PlantUML** (`.puml`) para edição 
 | [diagrama-classes.md](./diagrama-classes.md) | Estrutura de páginas, componentes, contexts e services |
 | [diagrama-sequencia.md](./diagrama-sequencia.md) | Sequências: fluxo completo, nova análise, histórico e autenticação |
 | [diagrama-banco-de-dados.md](./diagrama-banco-de-dados.md) | Persistência Firebase Auth + Firestore (via API) |
+| [processo-captura-consentimento.md](./processo-captura-consentimento.md) | **3.2** Captura e consentimento da imagem |
+| [processo-processamento-ia.md](./processo-processamento-ia.md) | **3.3** Processamento assistido por IA |
+| [processo-apresentacao-persistencia.md](./processo-apresentacao-persistencia.md) | **3.4** Apresentação e persistência dos resultados |
 
 ## Arquivos de diagrama (`diagramas/`)
 
@@ -21,6 +24,17 @@ Diagramas UML em **imagem** (PNG) e fontes **PlantUML** (`.puml`) para edição 
 | [sequencia-nova-analise.png](./diagramas/sequencia-nova-analise.png) | [sequencia-nova-analise.puml](./diagramas/sequencia-nova-analise.puml) |
 | [sequencia-historico.png](./diagramas/sequencia-historico.png) | [sequencia-historico.puml](./diagramas/sequencia-historico.puml) |
 | [sequencia-autenticacao.png](./diagramas/sequencia-autenticacao.png) | [sequencia-autenticacao.puml](./diagramas/sequencia-autenticacao.puml) |
+
+### Processos do relatório (`diagramas/processos/`)
+
+| Imagem PNG | Fonte PlantUML |
+|------------|----------------|
+| [atividade-captura-consentimento.png](./diagramas/processos/atividade-captura-consentimento.png) | [atividade-captura-consentimento.puml](./diagramas/processos/atividade-captura-consentimento.puml) |
+| [sequencia-captura-consentimento.png](./diagramas/processos/sequencia-captura-consentimento.png) | [sequencia-captura-consentimento.puml](./diagramas/processos/sequencia-captura-consentimento.puml) |
+| [atividade-processamento-ia.png](./diagramas/processos/atividade-processamento-ia.png) | [atividade-processamento-ia.puml](./diagramas/processos/atividade-processamento-ia.puml) |
+| [sequencia-processamento-ia.png](./diagramas/processos/sequencia-processamento-ia.png) | [sequencia-processamento-ia.puml](./diagramas/processos/sequencia-processamento-ia.puml) |
+| [atividade-apresentacao-persistencia.png](./diagramas/processos/atividade-apresentacao-persistencia.png) | [atividade-apresentacao-persistencia.puml](./diagramas/processos/atividade-apresentacao-persistencia.puml) |
+| [sequencia-apresentacao-persistencia.png](./diagramas/processos/sequencia-apresentacao-persistencia.png) | [sequencia-apresentacao-persistencia.puml](./diagramas/processos/sequencia-apresentacao-persistencia.puml) |
 
 ### Persistência (`diagramas/banco-de-dados/`)
 

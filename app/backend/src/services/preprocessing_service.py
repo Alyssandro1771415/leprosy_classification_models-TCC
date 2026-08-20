@@ -42,8 +42,9 @@ def prepare_model_input(image_bytes: bytes) -> np.ndarray:
     return np.expand_dims(y_channel, axis=(0, -1)).astype(np.float32)
 
 
-def prepare_model_input_dict(image_bytes: bytes) -> dict[str, np.ndarray]:
-    return {"input_layer": prepare_model_input(image_bytes)}
+def prepare_model_input_dict(image_bytes: bytes) -> np.ndarray:
+    """Tensor (1, 224, 224, 1) — compatível com InputLayer `input_1` do modelo y_bilateral."""
+    return prepare_model_input(image_bytes)
 
 
 def y_channel_to_display_rgb(y_channel: np.ndarray) -> np.ndarray:

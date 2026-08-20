@@ -1,0 +1,45 @@
+@startuml atividade-captura-consentimento
+!theme plain
+skinparam shadowing false
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1565C0
+title Diagrama de atividade — Captura e consentimento da imagem (3.2)
+
+start
+:Usuário autenticado acessa Home;
+:Toca em "NOVA ANÁLISE";
+:Abre tela NewAnalysis\n(/analyze/new);
+
+if (Origem da imagem?) then (Câmera)
+  :Captura foto\n(capture=environment);
+else (Galeria)
+  :Seleciona arquivo\n(accept=image/*);
+endif
+
+if (Arquivo válido?) then (não)
+  :Mantém na tela\nou solicita nova seleção;
+  stop
+else (sim)
+  :Gera preview\n(URL.createObjectURL);
+  :Monta ConsentFlowState\n{ file, preview };
+  :Navega para AnalyzeConsent\n(/analyze/consent);
+endif
+
+if (state presente?) then (não)
+  :Redireciona para /analyze/new;
+  stop
+else (sim)
+  :Exibe preview da imagem;
+  :Usuário informa consentimento\n(Sim / Não — uso para treino);
+  :Estado pronto para\nprocessamento (IA);
+endif
+
+stop
+
+note right
+  Saída desta etapa:
+  ConsentFlowState +
+  allowForTraining
+end note
+
+@enduml

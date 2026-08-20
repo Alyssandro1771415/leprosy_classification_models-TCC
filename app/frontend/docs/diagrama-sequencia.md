@@ -1,6 +1,6 @@
 # Diagramas de sequência
 
-Sequências UML geradas em PlantUML, refletindo o código e o uso pelo profissional de saúde. Fontes:
+Sequências UML geradas em PlantUML, refletindo o código e o uso pelo usuário final. Fontes:
 
 - [diagramas/sequencia-fluxo-completo.puml](./diagramas/sequencia-fluxo-completo.puml)
 - [diagramas/sequencia-nova-analise.puml](./diagramas/sequencia-nova-analise.puml)

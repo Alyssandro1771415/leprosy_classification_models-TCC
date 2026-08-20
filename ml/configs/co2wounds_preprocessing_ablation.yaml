@@ -25,6 +25,14 @@ variants:
 
 output_name_pattern: "modelo_binario_co2wounds_ablation_{variant}"
 processed_root: "data/co2wounds_v2/processed/ablation/{variant}/train_images_binary"
+
+# Estes valores são repassados por scripts/run_co2wounds_training_ablation.sh
+# (variáveis de ambiente EPOCHS e BATCH_SIZE). Mantenha os dois lados em sincronia.
 epochs: 40
-batch_size: 4
+# Batch < 8 quebra as BatchNorm do ResNet50 e o treino colapsa na classe majoritária.
+batch_size: 16
+learning_rate: 0.0001
+dropout: 0.5
+class_weight: balanced      # leprosy 1.5 / outros 0.75 na base 485/970
+monitor: val_auc            # acusa aprendizado real com classes desbalanceadas
 require_gpu: true

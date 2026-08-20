@@ -7,7 +7,9 @@ const config: CapacitorConfig = {
   appName: "leprosy-identifier",
   webDir: "dist",
   server: {
-    androidScheme: "https",
+    // http evita Mixed Content ao chamar a API local (http://IP:5000) no WebView
+    androidScheme: "http",
+    cleartext: true,
   },
   android: {
     adjustMarginsForEdgeToEdge: "force",
