@@ -27,7 +27,7 @@ class PreLoaderModel:
         if not os.path.exists(self.model_path):
             model_drive_id = os.getenv("MODEL_ID")
 
-            print("🚚 Modelo não encontrado localmente. Iniciando download do Google Drive...")
+            print("\033[94mModelo não encontrado localmente. Iniciando download do Google Drive...\033[0m")
 
             os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
 
@@ -39,7 +39,7 @@ class PreLoaderModel:
                 print(f"❌ Erro ao baixar o modelo: {e}")
                 raise e
         else:
-            print("📂 Modelo já existe localmente. Pulando download.")
+            print("\033[92mModelo já existe localmente. Pulando download.\033[0m")
 
     def model_loader(self):
         if self._initialized:
@@ -53,9 +53,9 @@ class PreLoaderModel:
             self.model = keras.models.load_model(self.model_path, compile=False)
             self._initialized = True
             print(
-                f"✅ Modelo carregado! input={self.model.input_shape} output={self.model.output_shape}"
+                f"\033[92mModelo carregado! input={self.model.input_shape} output={self.model.output_shape}\033[0m"
             )
             return self.model
         except Exception as e:
-            print(f"❌ Falha ao carregar o arquivo .keras: {e}")
+            print(f"\033[91mFalha ao carregar o arquivo .keras: {e}\033[0m")
             raise e
