@@ -264,3 +264,7 @@ ml/artifacts/
 # Material de apoio para a escrita do TCC (não versionado)
 documentacao_tcc/
 METODOLOGIA.docx
+
+# Agents skilss
+.agents/*
+skills-lock.json
