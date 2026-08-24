@@ -1,35 +1,21 @@
 FROM python:3.12-slim-bookworm
 
-# 1. Instalar dependências do sistema
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Instalar o uv
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
-RUN sh /uv-installer.sh && rm /uv-installer.sh
-ENV PATH="/root/.local/bin/:$PATH"
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# 3. PRIMEIRO: Copiar APENAS os arquivos de dependências
-# Isso garante que o 'uv sync' só rode de novo se você mudar o pyproject ou uv.lock
-COPY ["APP/Leprosy-Identifier - Back-End/pyproject.toml", "APP/Leprosy-Identifier - Back-End/uv.lock", "./"]
+# Copiar dependências primeiro preserva o cache quando só o código muda.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
 
-# 4. Instalar dependências (Demorado, mas ficará em cache)
-RUN uv sync --frozen
+COPY . .
 
-# 5. DEPOIS: Copiar o restante do código fonte
-# Agora, se você mudar o server.py, o Docker pula direto para cá!
-COPY ["APP/Leprosy-Identifier - Back-End/", "./"]
-
-# 6. Configurar ambiente
 ENV PYTHONPATH="/app"
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Garante que o Robyn use a porta que o Render injetar
-ENV PORT=$PORT
-
-# 7. Execução
+EXPOSE 5000
 CMD ["python", "server.py"]
