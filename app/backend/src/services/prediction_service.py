@@ -76,9 +76,8 @@ class PredictionService:
                     predictions.append(data)
 
                 return predictions
-            except Exception as e:
-                print(f"Erro real no Service: {e}")
-                raise e
+            except Exception:
+                raise
 
     def delete_prediction(self, user_id: str, prediction_id: str):
         user_ref = self.db.collection("users").document(user_id)

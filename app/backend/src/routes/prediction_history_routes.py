@@ -2,6 +2,7 @@ from robyn import Request, Response
 import json
 
 from src.controllers.prediction_controller import PredictionController
+from src.middlewares.request_logging import log_exception
 
 
 async def get_prediction_history(request: Request):
@@ -30,8 +31,9 @@ async def get_prediction_history(request: Request):
         )
 
     except Exception as e:
+        log_exception(e, "Falha ao consultar histórico")
         return Response(
             status_code=500,
             headers={"Content-Type": "application/json"},
-            description=json.dumps({"error": str(e)})
+            description=json.dumps({"error": "Erro interno do servidor"})
         )

@@ -2,6 +2,7 @@ from robyn import Request, Response
 import json
 
 from src.controllers.user_controller import UserController
+from src.middlewares.request_logging import log_exception
 
 
 async def set_user_consent(request: Request):
@@ -43,8 +44,9 @@ async def set_user_consent(request: Request):
         )
 
     except Exception as e:
+        log_exception(e, "Falha ao atualizar consentimento")
         return Response(
             status_code=500,
             headers={"Content-Type": "application/json"},
-            description=json.dumps({"error": str(e)})
+            description=json.dumps({"error": "Erro interno do servidor"})
         )

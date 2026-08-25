@@ -1,8 +1,8 @@
 from robyn import Request, Response
 import json
-import base64
 
 from src.controllers.prediction_controller import PredictionController
+from src.middlewares.request_logging import log_exception
 
 
 async def save_prediction(request: Request):
@@ -48,8 +48,9 @@ async def save_prediction(request: Request):
         )
 
     except Exception as e:
+        log_exception(e, "Falha ao salvar predição")
         return Response(
             status_code=500,
             headers={"Content-Type": "application/json"},
-            description=json.dumps({"error": str(e)})
+            description=json.dumps({"error": "Erro interno do servidor"})
         )

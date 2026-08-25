@@ -1,3 +1,4 @@
+import logging
 import os
 
 import gdown
@@ -5,6 +6,7 @@ import tf_keras as keras
 from dotenv import load_dotenv
 
 load_dotenv()
+application_logger = logging.getLogger("leprosy.application")
 
 
 class PreLoaderModel:
@@ -25,21 +27,19 @@ class PreLoaderModel:
     def _download_model(self):
         """Baixa o modelo do Google Drive se ele não existir localmente."""
         if not os.path.exists(self.model_path):
-            model_drive_id = os.getenv("MODEL_ID")
+            model_drive_id = os.getenv("MODEL_ID", "").strip().strip("\"'")
+            if not model_drive_id:
+                raise RuntimeError("MODEL_ID não configurado")
 
-            print("\033[94mModelo não encontrado localmente. Iniciando download do Google Drive...\033[0m")
+            application_logger.info("Modelo ausente; iniciando download")
 
             os.makedirs(os.path.dirname(self.model_path), exist_ok=True)
 
             url = f"https://drive.google.com/uc?id={model_drive_id}"
-            try:
-                gdown.download(url, self.model_path, quiet=False)
-                print("✅ Download concluído com sucesso!")
-            except Exception as e:
-                print(f"❌ Erro ao baixar o modelo: {e}")
-                raise e
+            gdown.download(url, self.model_path, quiet=False)
+            application_logger.info("Download do modelo concluído path=%s", self.model_path)
         else:
-            print("\033[92mModelo já existe localmente. Pulando download.\033[0m")
+            application_logger.info("Modelo encontrado localmente path=%s", self.model_path)
 
     def model_loader(self):
         if self._initialized:
@@ -47,15 +47,17 @@ class PreLoaderModel:
 
         self._download_model()
 
-        print("📊 Carregando modelo no TensorFlow (tf_keras)...")
+        application_logger.info("Carregando modelo no TensorFlow")
         try:
             # Modelo treinado em Keras 2 (keras.src.engine.functional) — tf_keras carrega corretamente
             self.model = keras.models.load_model(self.model_path, compile=False)
             self._initialized = True
-            print(
-                f"\033[92mModelo carregado! input={self.model.input_shape} output={self.model.output_shape}\033[0m"
+            application_logger.info(
+                "Modelo carregado input=%s output=%s",
+                self.model.input_shape,
+                self.model.output_shape,
             )
             return self.model
-        except Exception as e:
-            print(f"\033[91mFalha ao carregar o arquivo .keras: {e}\033[0m")
-            raise e
+        except Exception:
+            application_logger.error("Falha ao carregar modelo path=%s", self.model_path)
+            raise

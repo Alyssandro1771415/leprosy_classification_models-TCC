@@ -1,6 +1,10 @@
+import logging
+import os
+
 import firebase_admin
 from firebase_admin import credentials, firestore
-import os
+
+application_logger = logging.getLogger("leprosy.application")
 
 class FirebaseService:
     _db = None
@@ -27,9 +31,9 @@ class FirebaseService:
             if not cred_path:
                 raise Exception(f"Arquivo de credenciais do Firebase não encontrado. Tentados: {possible_paths}")
 
-            print(f"--- Firebase inicializado usando: {cred_path} ---")
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
+            application_logger.info("Firebase inicializado credential_source=%s", cred_path)
 
         cls._db = firestore.client()
 

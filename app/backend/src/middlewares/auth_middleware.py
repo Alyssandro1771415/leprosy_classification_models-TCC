@@ -1,9 +1,12 @@
+import json
+import logging
 import os
+
 from dotenv import load_dotenv
 from robyn import Request, Response
-import json
 
 load_dotenv()
+application_logger = logging.getLogger("leprosy.application")
 
 SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 
@@ -22,6 +25,7 @@ async def auth_middleware(request: Request):
         return request
 
     if not SECRET_TOKEN:
+        application_logger.error("SECRET_TOKEN não configurado")
         return Response(
             status_code=500,
             headers={"Content-Type": "application/json"},

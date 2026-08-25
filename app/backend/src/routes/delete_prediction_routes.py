@@ -2,6 +2,7 @@ from robyn import Request, Response
 import json
 
 from src.controllers.prediction_controller import PredictionController
+from src.middlewares.request_logging import log_exception
 
 
 async def delete_prediction(request: Request):
@@ -27,8 +28,12 @@ async def delete_prediction(request: Request):
 
     except Exception as e:
         status_code = 404 if "não encontrada" in str(e).lower() else 500
+        if status_code == 500:
+            log_exception(e, "Falha ao excluir predição")
         return Response(
             status_code=status_code,
             headers={"Content-Type": "application/json"},
-            description=json.dumps({"error": str(e)}),
+            description=json.dumps({
+                "error": str(e) if status_code == 404 else "Erro interno do servidor"
+            }),
         )

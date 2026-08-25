@@ -16,6 +16,8 @@ COPY . .
 
 ENV PYTHONPATH="/app"
 ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1
+ENV LOG_DIR="/app/logs"
 
 EXPOSE 5000
 CMD ["python", "server.py"]
